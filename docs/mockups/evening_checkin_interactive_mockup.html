@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IgniteHealth: Evening Check-in</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 32px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .time {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .greeting {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 15px;
+        }
+        
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 2px;
+            width: 5%;
+            transition: width 0.3s ease;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .question-number {
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .question {
+            font-size: 19px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.25;
+        }
+        
+        .pattern-btn {
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid #e9ecef;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .pattern-btn:hover, .pattern-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .pattern-icon {
+            font-size: 20px;
+            min-width: 25px;
+        }
+        
+        .scale {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 6px;
+            margin: 15px 0;
+        }
+        
+        .scale-number {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .scale-number:hover, .scale-number.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .navigation {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="screen">
+            <!-- Header -->
+            <div class="header">
+                <div class="time">Thursday, June 20 • 9:47 PM</div>
+                <div class="greeting">Evening reflection</div>
+                <div class="subtitle">How did your day unfold?</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Question 1: Energy Pattern -->
+                <div id="question1">
+                    <div class="question-number">Question 1 of 3</div>
+                    <div class="question">How did your energy flow today?</div>
+                    
+                    <div class="pattern-btn" onclick="selectPattern('steady')">
+                        <span class="pattern-icon">📈</span>
+                        <span>Steady all day</span>
+                    </div>
+                    <div class="pattern-btn" onclick="selectPattern('morning-crash')">
+                        <span class="pattern-icon">📉</span>
+                        <span>Strong morning, afternoon crash</span>
+                    </div>
+                    <div class="pattern-btn" onclick="selectPattern('slow-peak')">
+                        <span class="pattern-icon">⬆️</span>
+                        <span>Slow start, peaked later</span>
+                    </div>
+                    <div class="pattern-btn" onclick="selectPattern('multiple-dips')">
+                        <span class="pattern-icon">🎢</span>
+                        <span>Multiple energy dips</span>
+                    </div>
+                </div>
+
+                <!-- Question 2: Fatigue -->
+                <div id="question2" class="hidden">
+                    <div class="question-number">Question 2 of 3</div>
+                    <div class="question">Rate your fatigue level right now</div>
+                    
+                    <div class="scale">
+                        <div class="scale-number" onclick="selectScale(0)">0</div>
+                        <div class="scale-number" onclick="selectScale(1)">1</div>
+                        <div class="scale-number" onclick="selectScale(2)">2</div>
+                        <div class="scale-number" onclick="selectScale(3)">3</div>
+                        <div class="scale-number" onclick="selectScale(4)">4</div>
+                        <div class="scale-number" onclick="selectScale(5)">5</div>
+                        <div class="scale-number" onclick="selectScale(6)">6</div>
+                        <div class="scale-number" onclick="selectScale(7)">7</div>
+                        <div class="scale-number" onclick="selectScale(8)">8</div>
+                        <div class="scale-number" onclick="selectScale(9)">9</div>
+                        <div class="scale-number" onclick="selectScale(10)">10</div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>Not fatigued</span>
+                        <span>Extremely fatigued</span>
+                    </div>
+                </div>
+
+                <!-- Question 3: Sleep Readiness -->
+                <div id="question3" class="hidden">
+                    <div class="question-number">Question 3 of 3</div>
+                    <div class="question">How ready do you feel for quality sleep tonight?</div>
+                    
+                    <div class="scale">
+                        <div class="scale-number" onclick="selectScale(0)">0</div>
+                        <div class="scale-number" onclick="selectScale(1)">1</div>
+                        <div class="scale-number" onclick="selectScale(2)">2</div>
+                        <div class="scale-number" onclick="selectScale(3)">3</div>
+                        <div class="scale-number" onclick="selectScale(4)">4</div>
+                        <div class="scale-number" onclick="selectScale(5)">5</div>
+                        <div class="scale-number" onclick="selectScale(6)">6</div>
+                        <div class="scale-number" onclick="selectScale(7)">7</div>
+                        <div class="scale-number" onclick="selectScale(8)">8</div>
+                        <div class="scale-number" onclick="selectScale(9)">9</div>
+                        <div class="scale-number" onclick="selectScale(10)">10</div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>Not ready at all</span>
+                        <span>Very ready</span>
+                    </div>
+                </div>
+
+                <!-- Completion -->
+                <div id="completion" class="hidden">
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 60px; margin-bottom: 20px;">🌙</div>
+                        <div style="font-size: 24px; font-weight: 700; color: #333; margin-bottom: 12px;">Evening check-in complete!</div>
+                        <div style="font-size: 15px; color: #666; line-height: 1.4;">Your daily health picture is getting clearer with each check-in.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="previousQuestion()" id="backBtn" disabled>Back</button>
+                <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentQuestion = 1;
+        var totalQuestions = 3;
+
+        function updateProgress() {
+            var progress = (currentQuestion / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showQuestion(questionNum) {
+            // Hide all questions
+            for (var i = 1; i <= totalQuestions; i++) {
+                var questionEl = document.getElementById('question' + i);
+                if (questionEl) {
+                    questionEl.classList.add('hidden');
+                }
+            }
+            document.getElementById('completion').classList.add('hidden');
+
+            // Show current question
+            if (questionNum <= totalQuestions) {
+                var currentEl = document.getElementById('question' + questionNum);
+                if (currentEl) {
+                    currentEl.classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('completion').classList.remove('hidden');
+            }
+
+            // Update navigation
+            document.getElementById('backBtn').disabled = questionNum <= 1;
+            
+            if (questionNum > totalQuestions) {
+                document.getElementById('nextBtn').textContent = 'View Dashboard';
+            } else {
+                document.getElementById('nextBtn').textContent = 'Next';
+            }
+
+            updateProgress();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion > totalQuestions) {
+                alert('Navigate to dashboard!');
+                return;
+            }
+            currentQuestion++;
+            showQuestion(currentQuestion);
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        }
+
+        function selectPattern(pattern) {
+            var buttons = document.querySelectorAll('#question1 .pattern-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('selected');
+            }
+            event.target.closest('.pattern-btn').classList.add('selected');
+        }
+
+        function showCustomInput() {
+            document.getElementById('customInput').style.display = 'block';
+            document.getElementById('customText').focus();
+        }
+
+        function hideCustomInput() {
+            document.getElementById('customInput').style.display = 'none';
+            document.getElementById('customText').value = '';
+        }
+
+        function saveCustomOption() {
+            var input = document.getElementById('customText');
+            var customText = input.value.trim();
+            
+            if (customText) {
+                // Create new option button
+                var newOption = document.createElement('div');
+                newOption.className = 'pattern-btn selected';
+                newOption.innerHTML = '<span class="pattern-icon">💭</span><span>' + customText + '</span>';
+                newOption.onclick = function() {
+                    selectPattern('custom');
+                };
+                
+                // Insert before the add button
+                var addBtn = document.querySelector('.add-option-btn');
+                addBtn.parentNode.insertBefore(newOption, addBtn);
+                
+                // Clear existing selections
+                var allButtons = document.querySelectorAll('.pattern-btn');
+                for (var i = 0; i < allButtons.length; i++) {
+                    if (allButtons[i] !== newOption) {
+                        allButtons[i].classList.remove('selected');
+                    }
+                }
+                
+                hideCustomInput();
+            }
+        }
+
+        function selectScale(value) {
+            var buttons = document.querySelectorAll('#question' + currentQuestion + ' .scale-number');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('selected');
+            }
+            event.target.classList.add('selected');
+        }
+
+        // Initialize
+        showQuestion(1);
+    </script>
+</body>
+</html>

@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IgniteHealth - Your Health Journey Starts Here</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .onboarding-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 8px;
+        }
+        
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-dot.active {
+            background: #667eea;
+            transform: scale(1.2);
+        }
+        
+        .progress-dot.completed {
+            background: #10b981;
+        }
+        
+        .question-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .question-number {
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .question-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+        
+        .question-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        
+        /* FIXED SCALE STYLES */
+        .scale-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin: 30px 0 10px 0;
+            padding: 0 5px;
+        }
+        
+        .scale-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 5px;
+            border-radius: 8px;
+            flex: 1;
+            max-width: 45px;
+        }
+        
+        .scale-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .scale-circle {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #6b7280;
+            background: white;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+        
+        .scale-item.selected .scale-circle {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .scale-text {
+            font-size: 9px;
+            color: #6b7280;
+            text-align: center;
+            font-weight: 600;
+            line-height: 1.1;
+            height: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .scale-extremes {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            padding: 0 10px;
+        }
+        
+        .scale-extreme {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        
+        /* PRIORITY STYLES */
+        .priority-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .priority-option {
+            display: flex;
+            align-items: center;
+            padding: 18px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .priority-option:hover {
+            border-color: #667eea;
+            background: #f8faff;
+        }
+        
+        .priority-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .priority-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .priority-text {
+            flex: 1;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .priority-check {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .priority-option.selected .priority-check {
+            border-color: #667eea;
+            background: #667eea;
+        }
+        
+        .priority-option.selected .priority-check::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        /* COMMITMENT STYLES */
+        .commitment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .commitment-option {
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .commitment-option:hover {
+            border-color: #667eea;
+            background: #f8faff;
+        }
+        
+        .commitment-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .commitment-title {
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        
+        .commitment-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        /* NAVIGATION */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #e5e7eb;
+        }
+        
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* SUCCESS STYLES */
+        .success-container {
+            text-align: center;
+            display: none;
+        }
+        
+        .success-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        
+        .success-message {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .insight-preview {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .insight-preview-title {
+            font-weight: 600;
+            color: #0369a1;
+            margin-bottom: 10px;
+        }
+        
+        .insight-preview-text {
+            color: #0c4a6e;
+            font-size: 14px;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .onboarding-container {
+                padding: 30px 20px;
+            }
+            
+            .question-title {
+                font-size: 24px;
+            }
+            
+            .scale-item {
+                max-width: 35px;
+                padding: 3px;
+            }
+            
+            .scale-circle {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            
+            .scale-text {
+                font-size: 8px;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="onboarding-container">
+        <div class="progress-indicator">
+            <div class="progress-dot active" id="dot1"></div>
+            <div class="progress-dot" id="dot2"></div>
+            <div class="progress-dot" id="dot3"></div>
+        </div>
+        
+        <!-- Question 1 -->
+        <div id="question1" class="question-container">
+            <div class="question-number">Question 1 of 3</div>
+            <h1 class="question-title">How's your health feeling lately?</h1>
+            <p class="question-subtitle">On a typical day recently, how would you describe your overall energy and well-being?</p>
+            
+            <div class="scale-row">
+                <div class="scale-item" data-value="1">
+                    <div class="scale-circle">1</div>
+                    <div class="scale-text">Struggling</div>
+                </div>
+                <div class="scale-item" data-value="2">
+                    <div class="scale-circle">2</div>
+                    <div class="scale-text"></div>
+                </div>
+                <div class="scale-item" data-value="3">
+                    <div class="scale-circle">3</div>
+                    <div class="scale-text"></div>
+                </div>
+                <div class="scale-item" data-value="4">
+                    <div class="scale-circle">4</div>
+                    <div class="scale-text"></div>
+                </div>
+                <div class="scale-item" data-value="5">
+                    <div class="scale-circle">5</div>
+                    <div class="scale-text"></div>
+                </div>
+                <div class="scale-item" data-value="6">
+                    <div class="scale-circle">6</div>
+                    <div class="scale-text"></div>
+                </div>
+                <div class="scale-item" data-value="7">
+                    <div class="scale-circle">7</div>
+                    <div class="scale-text"></div>
+                </div>
+                <div class="scale-item" data-value="8">
+                    <div class="scale-circle">8</div>
+                    <div class="scale-text"></div>
+                </div>
+                <div class="scale-item" data-value="9">
+                    <div class="scale-circle">9</div>
+                    <div class="scale-text"></div>
+                </div>
+                <div class="scale-item" data-value="10">
+                    <div class="scale-circle">10</div>
+                    <div class="scale-text">Thriving</div>
+                </div>
+            </div>
+            
+            <div class="scale-extremes">
+                <div class="scale-extreme">Low energy, frequent symptoms</div>
+                <div class="scale-extreme">Generally energetic and feeling well</div>
+            </div>
+        </div>
+        
+        <!-- Question 2 -->
+        <div id="question2" class="question-container hidden">
+            <div class="question-number">Question 2 of 3</div>
+            <h1 class="question-title">What matters most to you?</h1>
+            <p class="question-subtitle">Select all the health priorities that are important to you right now</p>
+            
+            <div class="priority-grid">
+                <div class="priority-option" data-value="sleep">
+                    <div class="priority-icon">💤</div>
+                    <div class="priority-text">Better sleep quality</div>
+                    <div class="priority-check"></div>
+                </div>
+                <div class="priority-option" data-value="energy">
+                    <div class="priority-icon">⚡</div>
+                    <div class="priority-text">More consistent energy</div>
+                    <div class="priority-check"></div>
+                </div>
+                <div class="priority-option" data-value="pain">
+                    <div class="priority-icon">🎯</div>
+                    <div class="priority-text">Reduce pain/discomfort</div>
+                    <div class="priority-check"></div>
+                </div>
+                <div class="priority-option" data-value="mood">
+                    <div class="priority-icon">🧠</div>
+                    <div class="priority-text">Improve mood/stress</div>
+                    <div class="priority-check"></div>
+                </div>
+                <div class="priority-option" data-value="digestion">
+                    <div class="priority-icon">🍃</div>
+                    <div class="priority-text">Better digestion</div>
+                    <div class="priority-check"></div>
+                </div>
+                <div class="priority-option" data-value="weight">
+                    <div class="priority-icon">⚖️</div>
+                    <div class="priority-text">Weight management</div>
+                    <div class="priority-check"></div>
+                </div>
+                <div class="priority-option" data-value="symptoms">
+                    <div class="priority-icon">🔍</div>
+                    <div class="priority-text">Understanding symptoms</div>
+                    <div class="priority-check"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Question 3 -->
+        <div id="question3" class="question-container hidden">
+            <div class="question-number">Question 3 of 3</div>
+            <h1 class="question-title">How often can you check in?</h1>
+            <p class="question-subtitle">Choose what feels sustainable for discovering your health patterns</p>
+            
+            <div class="commitment-options">
+                <div class="commitment-option" data-value="daily">
+                    <div class="commitment-title">Daily check-ins (2-3 minutes)</div>
+                    <div class="commitment-subtitle">Unlock the most detailed insights and correlations</div>
+                </div>
+                <div class="commitment-option" data-value="few-times">
+                    <div class="commitment-title">A few times per week</div>
+                    <div class="commitment-subtitle">Discover key patterns in your health</div>
+                </div>
+                <div class="commitment-option" data-value="when-symptoms">
+                    <div class="commitment-title">When symptoms occur</div>
+                    <div class="commitment-subtitle">Track and understand your specific symptoms</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Success Screen -->
+        <div id="success" class="success-container">
+            <div class="success-icon">🎉</div>
+            <h1 class="success-title">You're all set!</h1>
+            <p class="success-message">Great! You're ready to discover your unique health patterns and take the first step toward empowering yourself.</p>
+            
+            <div class="insight-preview">
+                <div class="insight-preview-title">🔮 Your personalized insights await</div>
+                <div class="insight-preview-text" id="personalizedMessage">We'll help you identify what affects your energy levels and overall well-being.</div>
+            </div>
+            
+            <p class="question-subtitle" style="margin-top: 20px;">Tomorrow morning, we'll ask you a few quick questions to start building your health picture.</p>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-secondary" id="backBtn" disabled>Back</button>
+            <button class="btn btn-primary" id="nextBtn" disabled>Next</button>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let currentQuestion = 1;
+        let answers = {
+            wellbeing: null,
+            priorities: [],
+            commitment: null
+        };
+
+        // Get DOM elements
+        const backBtn = document.getElementById('backBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressDots = [
+            document.getElementById('dot1'),
+            document.getElementById('dot2'),
+            document.getElementById('dot3')
+        ];
+
+        // Question 1: Scale selection
+        document.querySelectorAll('.scale-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove selection from all items
+                document.querySelectorAll('.scale-item').forEach(i => i.classList.remove('selected'));
+                // Add selection to clicked item
+                this.classList.add('selected');
+                // Store answer
+                answers.wellbeing = parseInt(this.dataset.value);
+                // Enable next button
+                nextBtn.disabled = false;
+            });
+        });
+
+        // Question 2: Priority selection (multiple)
+        document.querySelectorAll('.priority-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.dataset.value;
+                
+                // Toggle selection
+                this.classList.toggle('selected');
+                
+                // Update answers array
+                if (answers.priorities.includes(value)) {
+                    answers.priorities = answers.priorities.filter(p => p !== value);
+                } else {
+                    answers.priorities.push(value);
+                }
+                
+                // Enable/disable next button
+                nextBtn.disabled = answers.priorities.length === 0;
+            });
+        });
+
+        // Question 3: Commitment selection
+        document.querySelectorAll('.commitment-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selection from all options
+                document.querySelectorAll('.commitment-option').forEach(o => o.classList.remove('selected'));
+                // Add selection to clicked option
+                this.classList.add('selected');
+                // Store answer
+                answers.commitment = this.dataset.value;
+                // Enable next button
+                nextBtn.disabled = false;
+            });
+        });
+
+        // Next button handler
+        nextBtn.addEventListener('click', function() {
+            if (currentQuestion < 3) {
+                // Hide current question
+                document.getElementById(`question${currentQuestion}`).classList.add('hidden');
+                
+                // Update progress dots
+                progressDots[currentQuestion - 1].classList.remove('active');
+                progressDots[currentQuestion - 1].classList.add('completed');
+                
+                // Move to next question
+                currentQuestion++;
+                
+                // Show next question
+                document.getElementById(`question${currentQuestion}`).classList.remove('hidden');
+                progressDots[currentQuestion - 1].classList.add('active');
+                
+                // Update navigation
+                backBtn.disabled = false;
+                nextBtn.disabled = true;
+                
+                if (currentQuestion === 3) {
+                    nextBtn.textContent = 'Complete';
+                }
+            } else {
+                // Complete onboarding
+                completeOnboarding();
+            }
+        });
+
+        // Back button handler
+        backBtn.addEventListener('click', function() {
+            if (currentQuestion > 1) {
+                // Hide current question
+                document.getElementById(`question${currentQuestion}`).classList.add('hidden');
+                
+                // Update progress dots
+                progressDots[currentQuestion - 1].classList.remove('active');
+                
+                // Move to previous question
+                currentQuestion--;
+                
+                // Show previous question
+                document.getElementById(`question${currentQuestion}`).classList.remove('hidden');
+                progressDots[currentQuestion - 1].classList.remove('completed');
+                progressDots[currentQuestion - 1].classList.add('active');
+                
+                // Update navigation
+                nextBtn.textContent = 'Next';
+                
+                // Check if we need to enable next button based on current answers
+                if (currentQuestion === 1 && answers.wellbeing !== null) {
+                    nextBtn.disabled = false;
+                } else if (currentQuestion === 2 && answers.priorities.length > 0) {
+                    nextBtn.disabled = false;
+                } else if (currentQuestion === 3 && answers.commitment !== null) {
+                    nextBtn.disabled = false;
+                    nextBtn.textContent = 'Complete';
+                } else {
+                    nextBtn.disabled = true;
+                }
+                
+                if (currentQuestion === 1) {
+                    backBtn.disabled = true;
+                }
+            }
+        });
+
+        // Complete onboarding
+        function completeOnboarding() {
+            // Hide all questions
+            document.querySelectorAll('.question-container').forEach(q => q.classList.add('hidden'));
+            
+            // Update all progress dots to completed
+            progressDots.forEach(dot => {
+                dot.classList.remove('active');
+                dot.classList.add('completed');
+            });
+            
+            // Generate personalized message
+            const personalizedMessage = generatePersonalizedMessage();
+            document.getElementById('personalizedMessage').textContent = personalizedMessage;
+            
+            // Show success screen
+            document.getElementById('success').classList.remove('hidden');
+            
+            // Hide navigation
+            document.querySelector('.navigation').style.display = 'none';
+        }
+
+        // Generate personalized message
+        function generatePersonalizedMessage() {
+            const messages = {
+                sleep: "optimize your sleep quality and its impact on your daily energy",
+                energy: "identify what gives you sustained energy throughout the day",
+                pain: "discover patterns that may be contributing to your discomfort",
+                mood: "understand what affects your mood and stress levels",
+                digestion: "uncover how different foods and habits affect your digestive health",
+                weight: "find sustainable patterns that support your weight goals",
+                symptoms: "help you connect the dots between symptoms and potential triggers"
+            };
+            
+            if (answers.priorities.length > 0) {
+                const firstPriority = answers.priorities[0];
+                return `We'll help you ${messages[firstPriority]} and discover what works best for your body.`;
+            }
+            
+            return "We'll help you identify what affects your energy levels and overall well-being.";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Gratitude Flow - Your Transformation Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 30px;
+            padding: 8px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            padding: 60px 20px 25px;
+            color: white;
+            text-align: center;
+        }
+        
+        .time {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        
+        .subtitle {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+        
+        .dashboard-content {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .transformation-card {
+            background: linear-gradient(135deg, #fff5ee 0%, #ffe4e1 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ff6b6b;
+            text-align: center;
+        }
+        
+        .transformation-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #d63031;
+            margin-bottom: 10px;
+        }
+        
+        .transformation-message {
+            font-size: 14px;
+            color: #2d3436;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .week-progress {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .week-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .week-dot.active {
+            background: #ff6b6b;
+            transform: scale(1.3);
+        }
+        
+        .week-dot.completed {
+            background: #00b894;
+        }
+        
+        .personal-discovery {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .discovery-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .discovery-insight {
+            font-size: 13px;
+            line-height: 1.5;
+            opacity: 0.95;
+            margin-bottom: 15px;
+        }
+        
+        .personal-pattern {
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 12px;
+            text-align: left;
+        }
+        
+        .pattern-label {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .evolution-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .evolution-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .evolution-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .view-toggle {
+            background: #6c5ce7;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .before-after {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        .before-after-header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        
+        .before-after-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .before-after-subtitle {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .before, .after {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .before {
+            background: #f8f9fa;
+            border-left: 3px solid #6c757d;
+        }
+        
+        .after {
+            background: #e8f5e8;
+            border-left: 3px solid #28a745;
+        }
+        
+        .before-label, .after-label {
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .before-label {
+            color: #6c757d;
+        }
+        
+        .after-label {
+            color: #28a745;
+        }
+        
+        .gratitude-text {
+            font-style: italic;
+            color: #495057;
+        }
+        
+        .actionable-insights {
+            background: #e8f5e8;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .insight-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d5a2d;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .insight-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .insight-pattern {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        
+        .insight-action {
+            font-size: 12px;
+            color: #4a6741;
+            background: #f0f8f0;
+            padding: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+        }
+        
+        .stress-breakthrough {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .breakthrough-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .stress-improvement {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .improvement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .improvement-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .improvement-result {
+            font-size: 14px;
+            font-weight: 700;
+            color: #28a745;
+        }
+        
+        .improvement-explanation {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .next-steps {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 12px;
+            padding: 18px;
+            color: white;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .next-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .next-message {
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            opacity: 0.95;
+        }
+        
+        .next-experiment {
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        
+        .experiment-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .navigation {
+            padding: 18px 20px 25px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .glow {
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3); }
+            to { box-shadow: 0 4px 20px rgba(255, 107, 107, 0.6); }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="screen">
+            <div class="dashboard-container">
+                <!-- Header -->
+                <div class="header">
+                    <div class="time">Thursday, June 20 • 8:15 AM</div>
+                    <div class="title">✨ Your Mind is Transforming</div>
+                    <div class="subtitle">Real changes happening in your life</div>
+                </div>
+                
+                <!-- Dashboard Content -->
+                <div class="dashboard-content">
+                    <!-- Transformation Card -->
+                    <div class="transformation-card glow">
+                        <div class="transformation-title">🎯 Your Breakthrough Moment</div>
+                        <div class="transformation-message">
+                            You just trained your brain to find calm even when stressed. That 10-second practice rewired your stress response and created a pattern you can use anywhere, anytime.
+                        </div>
+                        <div style="font-size: 13px; color: #636e72; margin-top: 10px;">
+                            <strong>Day 22:</strong> Building automatic stress relief
+                        </div>
+                        <div class="week-progress">
+                            <div class="week-dot completed"></div>
+                            <div class="week-dot completed"></div>
+                            <div class="week-dot completed"></div>
+                            <div class="week-dot active"></div>
+                            <div class="week-dot"></div>
+                            <div class="week-dot"></div>
+                            <div class="week-dot"></div>
+                            <div class="week-dot"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Personal Discovery -->
+                    <div class="personal-discovery">
+                        <div class="discovery-title">🔍 Your Personal Pattern Discovered</div>
+                        <div class="discovery-insight">
+                            We found something powerful: Your stress drops by 3-4 points within 2 hours after gratitude practice. This works even on your toughest days.
+                        </div>
+                        
+                        <div class="personal-pattern">
+                            <div class="pattern-label">When you're stressed (7+/10):</div>
+                            <div>Gratitude practice → 65% chance stress drops to manageable levels by lunch</div>
+                        </div>
+                        
+                        <div class="personal-pattern">
+                            <div class="pattern-label">Your success rate:</div>
+                            <div>18 out of 22 days this month - this really works for you!</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Evolution Section -->
+                    <div class="evolution-section">
+                        <div class="evolution-header">
+                            <div class="evolution-title">🦋 Watch Your Evolution</div>
+                            <button class="view-toggle" onclick="toggleView()">View All</button>
+                        </div>
+                        
+                        <!-- Before/After Comparison -->
+                        <div class="before-after">
+                            <div class="before-after-header">
+                                <div class="before-after-title">Same Situation, Different You</div>
+                                <div class="before-after-subtitle">How you handle stress has transformed</div>
+                            </div>
+                            <div class="comparison">
+                                <div class="before">
+                                    <div class="before-label">3 Weeks Ago</div>
+                                    <div class="gratitude-text">Stressed at 8/10, stayed there all day, affected sleep and mood</div>
+                                </div>
+                                <div class="after">
+                                    <div class="after-label">Today</div>
+                                    <div class="gratitude-text">Started at 7/10, used gratitude practice, down to 4/10 by noon. Felt in control.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="before-after">
+                            <div class="before-after-header">
+                                <div class="before-after-title">Your Gratitude Depth Evolution</div>
+                                <div class="before-after-subtitle">Notice how specific and rich your appreciation has become</div>
+                            </div>
+                            <div class="comparison">
+                                <div class="before">
+                                    <div class="before-label">Week 1</div>
+                                    <div class="gratitude-text">"My coffee"</div>
+                                </div>
+                                <div class="after">
+                                    <div class="after-label">This Week</div>
+                                    <div class="gratitude-text">"The warmth of my coffee cup creating tiny clouds of steam that dance in the morning light, giving me this perfect pause before the day begins"</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actionable Insights -->
+                    <div class="actionable-insights">
+                        <div class="insight-title">💡 What This Means for Your Life</div>
+                        
+                        <div class="insight-item">
+                            <div class="insight-pattern">🕐 Best Time for You: Morning practice (before 10am)</div>
+                            <div class="insight-action">Try tomorrow: Set a 9am reminder for 2-minute gratitude break when feeling stressed</div>
+                        </div>
+                        
+                        <div class="insight-item">
+                            <div class="insight-pattern">🎯 Your Trigger Words: "overwhelming," "behind schedule"</div>
+                            <div class="insight-action">When you notice these thoughts, that's your cue to pause and find one thing going well</div>
+                        </div>
+                        
+                        <div class="insight-item">
+                            <div class="insight-pattern">🌟 Your Superpower: Finding beauty in ordinary moments</div>
+                            <div class="insight-action">You're now 3x more detailed in appreciating simple pleasures - this skill transfers to all of life</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stress Breakthrough -->
+                    <div class="stress-breakthrough">
+                        <div class="breakthrough-title">📈 Your Stress Management Breakthrough</div>
+                        
+                        <div class="stress-improvement">
+                            <div class="improvement-header">
+                                <div class="improvement-label">Today's Achievement</div>
+                                <div class="improvement-result">7→4 in 2 hours</div>
+                            </div>
+                            <div class="improvement-explanation">
+                                You started stressed but used your new skills to actually change how you felt. This is evidence your brain is rewiring for resilience.
+                            </div>
+                        </div>
+                        
+                        <div class="stress-improvement">
+                            <div class="improvement-header">
+                                <div class="improvement-label">Weekly Average</div>
+                                <div class="improvement-result">6.2 → 3.8</div>
+                            </div>
+                            <div class="improvement-explanation">
+                                Your average stress recovery time went from 4+ hours to 90 minutes. You're becoming someone who bounces back faster.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class="next-steps">
+                        <div class="next-title">🚀 Your Next Growth Edge</div>
+                        <div class="next-message">
+                            You've mastered stress-relief gratitude. Ready to expand your skills? Here are your personalized next challenges:
+                        </div>
+                        
+                        <div class="next-experiment">
+                            <div class="experiment-title">Try This Week: "Difficulty Appreciation"</div>
+                            <div>Find one small thing to appreciate about challenging situations as they happen</div>
+                        </div>
+                        
+                        <div class="next-experiment">
+                            <div class="experiment-title">Advanced Skill: "Anticipatory Gratitude"</div>
+                            <div>Before stressful events, spend 30 seconds appreciating your ability to handle whatever comes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="continueTracking()">Continue Check-in</button>
+                    <button class="btn btn-primary" onclick="shareProgress()">Share This Win</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let viewMode = 'summary';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate elements in sequence
+            const elements = document.querySelectorAll('.personal-discovery, .evolution-section, .actionable-insights, .stress-breakthrough, .next-steps');
+            elements.forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('fade-in');
+                }, index * 300);
+            });
+            
+            // Animate week progress
+            setTimeout(() => {
+                document.querySelectorAll('.week-dot').forEach((dot, index) => {
+                    setTimeout(() => {
+                        if (index < 3) dot.classList.add('completed');
+                        if (index === 3) dot.classList.add('active');
+                    }, index * 100);
+                });
+            }, 500);
+        });
+        
+        function toggleView() {
+            if (viewMode === 'summary') {
+                viewMode = 'detailed';
+                alert('Would show detailed transformation timeline with weekly evolution, breakthrough moments, and pattern discovery history');
+            } else {
+                viewMode = 'summary';
+            }
+        }
+        
+        function continueTracking() {
+            alert('Would continue to Fuel & Care section with enhanced context about current mental state and stress management success');
+        }
+        
+        function shareProgress() {
+            const shareText = "I just discovered something amazing about myself: I can actually change my stress level from 7 to 4 in just 2 hours using gratitude practice! My brain is literally rewiring for resilience. 22 days of practice and the transformation is real. 🧠✨ #MindTransformation #GratitudePractice #StressRelief";
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Stress Management Breakthrough',
+                    text: shareText,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for devices without native sharing
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Your breakthrough story copied to clipboard! Share it with someone who needs hope.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

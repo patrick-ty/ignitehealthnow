@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Gratitude Section</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 30px;
+            padding: 8px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .checkin-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 60px 20px 25px;
+            color: white;
+            text-align: center;
+        }
+        
+        .time {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .greeting {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        
+        .subtitle {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+        
+        .progress-container {
+            padding: 18px 20px;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .progress-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .time-estimate {
+            font-size: 13px;
+            color: #666;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            border-radius: 3px;
+            width: 95%;
+            transition: width 0.4s ease;
+        }
+        
+        .chapters {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .chapter {
+            padding: 6px 10px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .chapter.active {
+            background: #4facfe;
+            color: white;
+        }
+        
+        .chapter.completed {
+            background: #28a745;
+            color: white;
+        }
+        
+        .chapter.upcoming {
+            background: #f1f3f4;
+            color: #666;
+        }
+        
+        .chapter-icon {
+            font-size: 10px;
+        }
+        
+        .question-container {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .question-number {
+            color: #4facfe;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .question {
+            font-size: 19px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.25;
+        }
+        
+        .numeric-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .time-input {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 16px;
+            text-align: left;
+            min-width: 200px;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+        
+        .time-input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        .option-btn {
+            padding: 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            border: 2px solid #e9ecef;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            margin-bottom: 6px;
+            width: 100%;
+        }
+        
+        .option-btn:hover, .option-btn.selected {
+            border-color: #4facfe;
+            background: #4facfe;
+            color: white;
+        }
+        
+        .insights-preview {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 12px;
+            color: #e65100;
+        }
+        
+        .insights-preview strong {
+            color: #bf360c;
+        }
+        
+        .navigation {
+            padding: 18px 20px 25px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="screen">
+            <div class="checkin-container">
+                <!-- Header -->
+                <div class="header">
+                    <div class="time">Thursday, June 20 • 7:42 AM</div>
+                    <div class="greeting">Good morning! ☀️</div>
+                    <div class="subtitle">Let's check in on your health & environment</div>
+                </div>
+                
+                <!-- Progress Section -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <div class="progress-text">Enhanced Check-in</div>
+                        <div class="time-estimate">4-5 min</div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    
+                    <div class="chapters">
+                        <div class="chapter completed">
+                            <div class="chapter-icon">💤</div>
+                            Vital Rhythms
+                        </div>
+                        <div class="chapter completed">
+                            <div class="chapter-icon">📸</div>
+                            Visual Baseline
+                        </div>
+                        <div class="chapter completed">
+                            <div class="chapter-icon">🎯</div>
+                            Body Signals
+                        </div>
+                        <div class="chapter active">
+                            <div class="chapter-icon">🧠</div>
+                            Mood & Mind
+                        </div>
+                        <div class="chapter upcoming">
+                            <div class="chapter-icon">🥗</div>
+                            Fuel & Care
+                        </div>
+                        <div class="chapter upcoming">
+                            <div class="chapter-icon">🌍</div>
+                            Environment
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question Container -->
+                <div class="question-container">
+                    <div class="question-number">Question 19 of 24 • Mood & Mindset</div>
+                    <div class="question">What's something happening right now that feels good?</div>
+                    
+                    <div id="answerContainer">
+                        <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <div style="font-size: 13px; color: #1976d2; font-weight: 500; margin-bottom: 8px;">Today's focus:</div>
+                            <div id="todaysPrompt" style="font-size: 14px; color: #2c5282; font-style: italic;">"What can you see from where you're sitting that brings you a little joy?"</div>
+                        </div>
+                        <div class="numeric-input">
+                            <input type="text" class="time-input" id="gratitudeInput" placeholder="Something you can see, feel, or experience right now..." style="width: 100%; text-align: left; min-width: 200px;">
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Quick suggestions:</div>
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 6px;">
+                                <button class="option-btn" onclick="selectGratitudeSuggestion('The warmth of your coffee')">The warmth of your coffee</button>
+                                <button class="option-btn" onclick="selectGratitudeSuggestion('Sunlight coming through the window')">Sunlight coming through the window</button>
+                                <button class="option-btn" onclick="selectGratitudeSuggestion('Your comfortable bed')">Your comfortable bed</button>
+                                <button class="option-btn" onclick="selectGratitudeSuggestion('Being able to breathe easily')">Being able to breathe easily</button>
+                                <button class="option-btn" onclick="selectGratitudeSuggestion('A moment of quiet')">A moment of quiet</button>
+                            </div>
+                        </div>
+                        <div id="gratitudeFollow" style="display: none; background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 12px; margin-top: 15px;" class="fade-in">
+                            <div style="font-size: 13px; color: #e65100; margin-bottom: 8px;">Let's get more specific:</div>
+                            <div id="specificityPrompt" style="font-size: 12px; color: #bf360c; margin-bottom: 10px;"></div>
+                            <input type="text" id="specificInput" placeholder="What exactly about this feels good?" style="width: 100%; padding: 8px; border: 1px solid #ffe082; border-radius: 6px; font-size: 12px; margin-bottom: 10px;">
+                            <div style="text-align: center;">
+                                <button onclick="startEmbodiment()" style="background: #ff9800; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;" class="pulse">Take 10 seconds to feel this</button>
+                            </div>
+                        </div>
+                        <div id="embodimentTimer" style="display: none; background: #e8f5e8; border: 1px solid #c3e6c3; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: center;" class="fade-in">
+                            <div style="font-size: 14px; color: #2d5a2d; margin-bottom: 10px;">Take a moment to really feel this...</div>
+                            <div id="timerDisplay" style="font-size: 24px; font-weight: bold; color: #4a6741;">10</div>
+                            <div style="font-size: 12px; color: #4a6741; margin-top: 5px;">Breathe and notice how this feels in your body</div>
+                        </div>
+                    </div>
+                    
+                    <div class="insights-preview">
+                        <strong>💡 Health insight:</strong> Present-moment appreciation rewires your brain for positivity and reduces stress by 35%. We'll help you get specific.
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="navigation">
+                    <button class="btn btn-secondary">Back</button>
+                    <button class="btn btn-primary" id="nextBtn">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gratitudePrompts = [
+            "What can you see from where you're sitting that brings you a little joy?",
+            "What does your body feel grateful for this morning?",
+            "What small comfort are you enjoying right now?",
+            "What's working well in your immediate environment?",
+            "What ability or function of your body are you appreciating today?"
+        ];
+
+        let currentStep = 'initial';
+        let timerInterval;
+
+        // Rotate prompt every 3 seconds for demo
+        let promptIndex = 0;
+        setInterval(() => {
+            promptIndex = (promptIndex + 1) % gratitudePrompts.length;
+            document.getElementById('todaysPrompt').textContent = `"${gratitudePrompts[promptIndex]}"`;
+        }, 3000);
+
+        function selectGratitudeSuggestion(suggestion) {
+            const input = document.getElementById('gratitudeInput');
+            input.value = suggestion;
+            
+            // Remove selection from other buttons
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            
+            // Show specificity follow-up after a brief delay
+            setTimeout(() => {
+                const followUp = document.getElementById('gratitudeFollow');
+                const promptDiv = document.getElementById('specificityPrompt');
+                
+                if (suggestion.includes('coffee')) {
+                    promptDiv.textContent = "What exactly about your coffee feels good right now? The warmth in your hands, the aroma, the taste, the ritual, or the pause it gives you?";
+                } else if (suggestion.includes('sunlight')) {
+                    promptDiv.textContent = "What do you notice about the sunlight? How it looks, feels on your skin, brightens your space, or lifts your mood?";
+                } else if (suggestion.includes('bed')) {
+                    promptDiv.textContent = "What about your bed feels good? The softness, warmth, support, comfort, or sense of rest and safety?";
+                } else if (suggestion.includes('breathe')) {
+                    promptDiv.textContent = "What do you notice about breathing easily right now? The rhythm, the ease, the life it gives you, or simply the fact that it's happening automatically?";
+                } else if (suggestion.includes('quiet')) {
+                    promptDiv.textContent = "What about this quiet moment feels good? The peace, the space to think, the absence of noise, or the opportunity to just be?";
+                } else {
+                    promptDiv.textContent = "What specifically about this feels good to you right now?";
+                }
+                
+                followUp.style.display = 'block';
+                currentStep = 'specificity';
+                
+                // Auto-focus the specificity input
+                setTimeout(() => {
+                    document.getElementById('specificInput').focus();
+                }, 100);
+                
+            }, 800);
+        }
+
+        function startEmbodiment() {
+            const timer = document.getElementById('embodimentTimer');
+            const display = document.getElementById('timerDisplay');
+            const followUp = document.getElementById('gratitudeFollow');
+            const specificText = document.getElementById('specificInput').value;
+            
+            followUp.style.display = 'none';
+            timer.style.display = 'block';
+            currentStep = 'embodiment';
+            
+            let seconds = 10;
+            display.textContent = seconds;
+            
+            timerInterval = setInterval(() => {
+                seconds--;
+                display.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(timerInterval);
+                    timer.innerHTML = `
+                        <div style="font-size: 16px; color: #2d5a2d; margin-bottom: 8px;">✓ Beautiful!</div>
+                        <div style="font-size: 12px; color: #4a6741; margin-bottom: 10px;">You're training your brain to notice and feel good moments.</div>
+                        <div style="font-size: 11px; color: #6b7c69; font-style: italic;">This practice strengthens neural pathways for positivity and resilience.</div>
+                    `;
+                    currentStep = 'complete';
+                    
+                    // Enable next button with special styling
+                    const nextBtn = document.getElementById('nextBtn');
+                    nextBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                    nextBtn.textContent = 'Continue Feeling Good →';
+                }
+            }, 1000);
+        }
+
+        // Allow manual typing in main input
+        document.getElementById('gratitudeInput').addEventListener('input', function() {
+            if (this.value.length > 5 && currentStep === 'initial') {
+                // Show follow-up for manual entries too
+                setTimeout(() => {
+                    const followUp = document.getElementById('gratitudeFollow');
+                    const promptDiv = document.getElementById('specificityPrompt');
+                    
+                    promptDiv.textContent = "That's wonderful! What specifically about this feels good to you right now?";
+                    followUp.style.display = 'block';
+                    currentStep = 'specificity';
+                }, 1000);
+            }
+        });
+
+        // Demo: Auto-complete flow after 5 seconds if user doesn't interact
+        setTimeout(() => {
+            if (currentStep === 'initial') {
+                selectGratitudeSuggestion('Sunlight coming through the window');
+                
+                setTimeout(() => {
+                    if (currentStep === 'specificity') {
+                        document.getElementById('specificInput').value = 'The way it brightens the room and feels warm on my face';
+                        
+                        setTimeout(() => {
+                            startEmbodiment();
+                        }, 2000);
+                    }
+                }, 3000);
+            }
+        }, 8000);
+
+        function handleNext() {
+            // Show completion screen
+            document.querySelector('.checkin-container').innerHTML = `
+                <div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px 30px; background: linear-gradient(135deg, #e8f5e8 0%, #f0f8ff 100%);">
+                    <div style="font-size: 60px; margin-bottom: 20px;">🌟</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #333; margin-bottom: 12px;">Gratitude Practice Complete!</div>
+                    <div style="font-size: 15px; color: #666; margin-bottom: 25px; line-height: 1.4;">You've just strengthened your brain's positivity pathways. This daily practice reduces stress and increases life satisfaction.</div>
+                    
+                    <div style="background: #fff; border-radius: 12px; padding: 18px; margin-bottom: 25px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px;">🧠 What Just Happened:</div>
+                        <div style="font-size: 13px; color: #666; line-height: 1.4;">
+                            • You practiced <strong>present-moment awareness</strong><br>
+                            • You got <strong>specific</strong> about good feelings<br>
+                            • You <strong>embodied</strong> the appreciation for 10 seconds<br>
+                            • Your brain created new <strong>neural pathways</strong> for noticing good
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fff; border-radius: 12px; padding: 18px; margin-bottom: 25px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px;">📈 Research Shows:</div>
+                        <div style="font-size: 13px; color: #666; line-height: 1.4;">
+                            Daily gratitude practice like this increases happiness by <strong>25%</strong>, reduces stress by <strong>35%</strong>, and improves sleep quality by <strong>20%</strong> within just 2 weeks.
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fff; border-radius: 12px; padding: 18px; margin-bottom: 25px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px;">🎯 Tonight's Gratitude:</div>
+                        <div style="font-size: 13px; color: #666; line-height: 1.4;">
+                            Your evening check-in will ask: <em>"What surprised you in a good way today, even if small?"</em> - building on today's awareness.
+                        </div>
+                    </div>
+                    
+                    <button onclick="continueToNextSection()" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; padding: 16px 40px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 15px;">Continue to Fuel & Care →</button>
+                    
+                    <div style="margin-top: 20px; font-size: 12px; color: #666;">
+                        Daily gratitude streak: Day 1 🔥<br>
+                        Building positive neural pathways...
+                    </div>
+                </div>
+            `;
+        }
+
+        function continueToNextSection() {
+            document.querySelector('.checkin-container').innerHTML = `
+                <div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px 30px;">
+                    <div style="font-size: 60px; margin-bottom: 20px;">🥗</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #333; margin-bottom: 12px;">Next: Fuel & Care Section</div>
+                    <div style="font-size: 15px; color: #666; margin-bottom: 25px; line-height: 1.4;">This would continue with the next 3 questions about hydration, medications, and hunger levels.</div>
+                    
+                    <div style="background: #f8f9fa; border-radius: 12px; padding: 18px; margin-bottom: 25px; text-align: left;">
+                        <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px;">Preview of Next Questions:</div>
+                        <div style="font-size: 13px; color: #666; line-height: 1.4;">
+                            • How hydrated do you feel right now?<br>
+                            • Did you take your morning medications/supplements?<br>
+                            • Rate your hunger level this morning
+                        </div>
+                    </div>
+                    
+                    <button onclick="location.reload()" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; border: none; padding: 16px 40px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer;">Reset Demo</button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

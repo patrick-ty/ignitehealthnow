@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IgniteHealth: Complete Evening Check-in</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 32px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .time {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .greeting {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 15px;
+        }
+        
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 2px;
+            width: 5%;
+            transition: width 0.3s ease;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .question-number {
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .question {
+            font-size: 19px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.25;
+        }
+        
+        .pattern-btn {
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid #e9ecef;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        
+        .pattern-btn:hover, .pattern-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .pattern-icon {
+            font-size: 20px;
+            min-width: 25px;
+        }
+        
+        .scale {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 6px;
+            margin: 15px 0;
+        }
+        
+        .scale-number {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .scale-number:hover, .scale-number.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .add-option-btn {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 2px dashed #667eea;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            margin-top: 8px;
+        }
+        
+        .add-option-btn:hover {
+            background: #f8f9fa;
+            border-color: #5a67d8;
+        }
+        
+        .custom-input {
+            display: none;
+            margin-top: 10px;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .custom-input input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            padding: 5px 0;
+        }
+        
+        .custom-input input::placeholder {
+            color: #999;
+        }
+        
+        .custom-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .custom-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .custom-btn-save {
+            background: #667eea;
+            color: white;
+        }
+        
+        .custom-btn-cancel {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+        }
+        
+        .time-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .time-picker {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: white;
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        .time-picker:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .conditional-section {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .conditional-header {
+            font-size: 13px;
+            color: #1976d2;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .text-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #333;
+            background: white;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .text-input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .mood-btn {
+            padding: 12px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 2px solid #e9ecef;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .mood-btn:hover, .mood-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .completion-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .completion-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .completion-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .completion-subtitle {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 25px;
+        }
+        
+        .insight-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .insight-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .insight-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .navigation {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="screen">
+            <!-- Header -->
+            <div class="header">
+                <div class="time">Thursday, June 20 • 9:47 PM</div>
+                <div class="greeting">Evening reflection</div>
+                <div class="subtitle">How did your day unfold?</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Question 1: Energy Pattern -->
+                <div id="question1">
+                    <div class="question-number">Question 1 of 20 • VITAL RHYTHMS</div>
+                    <div class="question">How would you describe your overall energy pattern today?</div>
+                    
+                    <div class="pattern-btn" onclick="selectPattern(this, 'steady-all-day')">
+                        <div class="pattern-icon">⚡</div>
+                        <div>Steady energy all day</div>
+                    </div>
+                    <div class="pattern-btn" onclick="selectPattern(this, 'morning-peak')">
+                        <div class="pattern-icon">🌅</div>
+                        <div>Strong morning, faded later</div>
+                    </div>
+                    <div class="pattern-btn" onclick="selectPattern(this, 'afternoon-crash')">
+                        <div class="pattern-icon">📉</div>
+                        <div>Afternoon energy crash</div>
+                    </div>
+                    <div class="pattern-btn" onclick="selectPattern(this, 'evening-peak')">
+                        <div class="pattern-icon">🌆</div>
+                        <div>Peak energy in evening</div>
+                    </div>
+                    <div class="pattern-btn" onclick="selectPattern(this, 'unpredictable')">
+                        <div class="pattern-icon">🎢</div>
+                        <div>Unpredictable ups and downs</div>
+                    </div>
+                    
+                    <div class="add-option-btn" onclick="showCustomInput('q1-custom')">+ Add your own description</div>
+                    <div class="custom-input" id="q1-custom">
+                        <input type="text" placeholder="Describe your energy pattern...">
+                        <div class="custom-buttons">
+                            <button class="custom-btn custom-btn-save" onclick="saveCustomInput('q1-custom')">Save</button>
+                            <button class="custom-btn custom-btn-cancel" onclick="hideCustomInput('q1-custom')">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div id="question2" style="display: none;">
+                    <div class="question-number">Question 2 of 20 • VITAL RHYTHMS</div>
+                    <div class="question">What time did you feel most energetic today?</div>
+                    
+                    <div class="time-input">
+                        <input type="time" class="time-picker" id="peak-time" onchange="selectTime()">
+                        <span style="font-size: 14px; color: #666;">Select your peak energy time</span>
+                    </div>
+                    
+                    <div class="conditional-section" id="peak-follow-up" style="display: none;">
+                        <div class="conditional-header">Was this typical for you?</div>
+                        <div class="pattern-btn" onclick="selectPattern(this, 'earlier')">Earlier than usual</div>
+                        <div class="pattern-btn" onclick="selectPattern(this, 'normal')">Normal for me</div>
+                        <div class="pattern-btn" onclick="selectPattern(this, 'later')">Later than usual</div>
+                        
+                        <div class="add-option-btn" onclick="showCustomInput('peak-timing-custom')">+ Add your own description</div>
+                        <div class="custom-input" id="peak-timing-custom">
+                            <input type="text" placeholder="Describe your peak energy timing...">
+                            <div class="custom-buttons">
+                                <button class="custom-btn custom-btn-save" onclick="saveCustomInput('peak-timing-custom')">Save</button>
+                                <button class="custom-btn custom-btn-cancel" onclick="hideCustomInput('peak-timing-custom')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div id="question3" style="display: none;">
+                    <div class="question-number">Question 3 of 20 • VITAL RHYTHMS</div>
+                    <div class="question">How fatigued do you feel right now?</div>
+                    
+                    <div class="scale">
+                        <div class="scale-number" onclick="selectScale(this, 0)">0</div>
+                        <div class="scale-number" onclick="selectScale(this, 1)">1</div>
+                        <div class="scale-number" onclick="selectScale(this, 2)">2</div>
+                        <div class="scale-number" onclick="selectScale(this, 3)">3</div>
+                        <div class="scale-number" onclick="selectScale(this, 4)">4</div>
+                        <div class="scale-number" onclick="selectScale(this, 5)">5</div>
+                        <div class="scale-number" onclick="selectScale(this, 6)">6</div>
+                        <div class="scale-number" onclick="selectScale(this, 7)">7</div>
+                        <div class="scale-number" onclick="selectScale(this, 8)">8</div>
+                        <div class="scale-number" onclick="selectScale(this, 9)">9</div>
+                        <div class="scale-number" onclick="selectScale(this, 10)">10</div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>Not fatigued</span>
+                        <span>Extremely fatigued</span>
+                    </div>
+                    
+                    <div class="conditional-section" id="fatigue-follow-up" style="display: none;">
+                        <div class="conditional-header">What contributed most to your fatigue today?</div>
+                        <div class="pattern-btn" onclick="selectPattern(this, 'poor-sleep')">😴 Poor sleep last night</div>
+                        <div class="pattern-btn" onclick="selectPattern(this, 'physical-activity')">🏃 Physical activity/exercise</div>
+                        <div class="pattern-btn" onclick="selectPattern(this, 'mental-stress')">🧠 Mental stress or overthinking</div>
+                        <div class="pattern-btn" onclick="selectPattern(this, 'food-crash')">🍔 Energy crash from food</div>
+                        <div class="pattern-btn" onclick="selectPattern(this, 'illness')">🤒 Fighting off illness</div>
+                        
+                        <div class="add-option-btn" onclick="showCustomInput('fatigue-custom')">+ Add other cause</div>
+                        <div class="custom-input" id="fatigue-custom">
+                            <input type="text" placeholder="What else contributed to fatigue...">
+                            <div class="custom-buttons">
+                                <button class="custom-btn custom-btn-save" onclick="saveCustomInput('fatigue-custom')">Save</button>
+                                <button class="custom-btn custom-btn-cancel" onclick="hideCustomInput('fatigue-custom')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div id="question4" style="display: none;">
+                    <div class="question-number">Question 4 of 20 • VITAL RHYTHMS</div>
+                    <div class="question">How ready do you feel for quality sleep tonight?</div>
+                    
+                    <div class="scale">
+                        <div class="scale-number" onclick="selectScale(this, 0)">0</div>
+                        <div class="scale-number" onclick="selectScale(this, 1)">1</div>
+                        <div class="scale-number" onclick="selectScale(this, 2)">2</div>
+                        <div class="scale-number" onclick="selectScale(this, 3)">3</div>
+                        <div class="scale-number" onclick="selectScale(this, 4)">4</div>
+                        <div class="scale-number" onclick="selectScale(this, 5)">5</div>
+                        <div class="scale-number" onclick="selectScale(this, 6)">6</div>
+                        <div class="scale-number" onclick="selectScale(this, 7)">7</div>
+                        <div class="scale-number" onclick="selectScale(this, 8)">8</div>
+                        <div class="scale-number" onclick="selectScale(this, 9)">9</div>
+                        <div class="scale-number" onclick="selectScale(this, 10)">10</div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>Not ready at all</span>
+                        <span>Very ready</span>
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                <div id="question5" style="display: none;">
+                    <div class="question-number">Question 5 of 20 • VITAL RHYTHMS</div>
+                    <div class="question">How would you rate your overall stress recovery today?</div>
+                    
+                    <div class="scale">
+                        <div class="scale-number" onclick="selectScale(this, 0)">0</div>
+                        <div class="scale-number" onclick="selectScale(this, 1)">1</div>
+                        <div class="scale-number" onclick="selectScale(this, 2)">2</div>
+                        <div class="scale-number" onclick="selectScale(this, 3)">3</div>
+                        <div class="scale-number" onclick="selectScale(this, 4)">4</div>
+                        <div class="scale-number" onclick="selectScale(this, 5)">5</div>
+                        <div class="scale-number" onclick="selectScale(this, 6)">6</div>
+                        <div class="scale-number" onclick="selectScale(this, 7)">7</div>
+                        <div class="scale-number" onclick="selectScale(this, 8)">8</div>
+                        <div class="scale-number" onclick="selectScale(this, 9)">9</div>
+                        <div class="scale-number" onclick="selectScale(this, 10)">10</div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>Poor recovery</span>
+                        <span>Excellent recovery</span>
+                    </div>
+                </div>
+
+                <!-- Completion -->
+                <div id="completion" style="display: none;">
+                    <div class="completion-screen">
+                        <div class="completion-icon">🌙</div>
+                        <div class="completion-title">Evening check-in complete!</div>
+                        <div class="completion-subtitle">Your daily health picture is getting clearer with each check-in.</div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">🔍 Pattern Detected</div>
+                            <div class="insight-text">Your energy patterns show a strong correlation with your sleep readiness. When you feel more fatigued (like today), your sleep readiness tends to be higher, suggesting good natural rhythm alignment.</div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">💡 Tomorrow's Recommendation</div>
+                            <div class="insight-text">Based on your stress anticipation and current state, consider doing your relaxation routine 30 minutes earlier than usual to optimize your recovery for tomorrow's challenges.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="previousQuestion()" id="backBtn" disabled>Back</button>
+                <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentQuestion = 1;
+        var totalQuestions = 5; // Starting with 5 working questions
+        var selectedValues = {};
+
+        function updateProgress() {
+            var progress = (currentQuestion / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showQuestion(questionNum) {
+            // Hide all questions first
+            for (var i = 1; i <= totalQuestions; i++) {
+                var questionEl = document.getElementById('question' + i);
+                if (questionEl) {
+                    questionEl.style.display = 'none';
+                }
+            }
+            
+            // Hide completion screen
+            var completionEl = document.getElementById('completion');
+            if (completionEl) {
+                completionEl.style.display = 'none';
+            }
+
+            // Show current question
+            if (questionNum <= totalQuestions) {
+                var currentEl = document.getElementById('question' + questionNum);
+                if (currentEl) {
+                    currentEl.style.display = 'block';
+                }
+            } else {
+                // Show completion screen
+                if (completionEl) {
+                    completionEl.style.display = 'block';
+                }
+            }
+
+            // Update navigation
+            document.getElementById('backBtn').disabled = questionNum <= 1;
+            
+            if (questionNum > totalQuestions) {
+                document.getElementById('nextBtn').textContent = 'View Dashboard';
+                document.getElementById('nextBtn').disabled = false;
+            } else {
+                document.getElementById('nextBtn').textContent = 'Next';
+                checkAnswerStatus();
+            }
+
+            updateProgress();
+        }
+
+        function checkAnswerStatus() {
+            var isAnswered = selectedValues['q' + currentQuestion] !== undefined;
+            document.getElementById('nextBtn').disabled = !isAnswered;
+        }
+
+        function selectPattern(element, value) {
+            // Remove selected class from siblings
+            var siblings = element.parentNode.children;
+            for (var i = 0; i < siblings.length; i++) {
+                if (siblings[i].classList && siblings[i].classList.contains('pattern-btn')) {
+                    siblings[i].classList.remove('selected');
+                }
+            }
+            
+            // Add selected class to clicked element
+            element.classList.add('selected');
+            
+            // Store the value
+            selectedValues['q' + currentQuestion] = value;
+            checkAnswerStatus();
+        }
+
+        function selectScale(element, value) {
+            // Remove selected class from siblings
+            var siblings = element.parentNode.children;
+            for (var i = 0; i < siblings.length; i++) {
+                if (siblings[i].classList && siblings[i].classList.contains('scale-number')) {
+                    siblings[i].classList.remove('selected');
+                }
+            }
+            
+            // Add selected class to clicked element
+            element.classList.add('selected');
+            
+            // Store the value
+            selectedValues['q' + currentQuestion] = value;
+            checkAnswerStatus();
+            
+            // Show conditional sections based on question and value
+            if (currentQuestion === 3 && value >= 6) {
+                document.getElementById('fatigue-follow-up').style.display = 'block';
+            }
+            
+            // Store the value
+            selectedValues['q' + currentQuestion] = value;
+            checkAnswerStatus();
+            
+            // Show conditional sections based on question and response
+            if (currentQuestion === 7 && value !== 'no-pain') {
+                document.getElementById('pain-details').style.display = 'block';
+            }
+            if (currentQuestion === 8 && value !== 'none' && (value === 'minor-new' || value === 'digestive' || value === 'skin-changes' || value === 'concerning')) {
+                document.getElementById('symptom-details').style.display = 'block';
+            }
+        }
+
+        function selectTime() {
+            var timeValue = document.getElementById('peak-time').value;
+            if (timeValue) {
+                selectedValues['q' + currentQuestion] = timeValue;
+                document.getElementById('peak-follow-up').style.display = 'block';
+                checkAnswerStatus();
+            }
+        }
+
+        function showCustomInput(inputId) {
+            document.getElementById(inputId).style.display = 'block';
+        }
+
+        function hideCustomInput(inputId) {
+            document.getElementById(inputId).style.display = 'none';
+            document.getElementById(inputId).querySelector('input').value = '';
+        }
+
+        function saveCustomInput(inputId) {
+            var input = document.getElementById(inputId).querySelector('input');
+            var value = input.value.trim();
+            
+            if (value) {
+                selectedValues['q' + currentQuestion] = 'custom: ' + value;
+                
+                // Create a new button to show the saved custom option
+                var customBtn = document.createElement('div');
+                customBtn.className = 'pattern-btn selected';
+                customBtn.innerHTML = '<div class="pattern-icon">✨</div><div>' + value + '</div>';
+                
+                // Insert before the add button
+                var addBtn = document.getElementById(inputId).previousElementSibling;
+                addBtn.parentNode.insertBefore(customBtn, addBtn);
+                
+                hideCustomInput(inputId);
+                checkAnswerStatus();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion > totalQuestions) {
+                alert('Navigate to dashboard!');
+                return;
+            }
+            
+            currentQuestion++;
+            showQuestion(currentQuestion);
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        }
+
+        // Initialize
+        showQuestion(1);
+    </script>
+</body>
+</html>

@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IgniteHealth: Complete Morning Check-in</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 30px;
+            padding: 8px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .checkin-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 60px 20px 25px;
+            color: white;
+            text-align: center;
+        }
+        
+        .time {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .greeting {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        
+        .subtitle {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+        
+        .progress-container {
+            padding: 18px 20px;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .progress-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .time-estimate {
+            font-size: 13px;
+            color: #666;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            border-radius: 3px;
+            width: 5.56%;
+            transition: width 0.4s ease;
+        }
+        
+        .chapters {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .chapter {
+            padding: 6px 10px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .chapter.active {
+            background: #4facfe;
+            color: white;
+        }
+        
+        .chapter.completed {
+            background: #28a745;
+            color: white;
+        }
+        
+        .chapter.upcoming {
+            background: #f1f3f4;
+            color: #666;
+        }
+        
+        .chapter-icon {
+            font-size: 10px;
+        }
+        
+        .question-container {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .question-number {
+            color: #4facfe;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .question {
+            font-size: 19px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.25;
+        }
+        
+        .numeric-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .time-input {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 16px;
+            text-align: center;
+            min-width: 100px;
+            transition: border-color 0.2s;
+        }
+        
+        .time-input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        .scale-container {
+            margin: 15px 0;
+        }
+        
+        .scale {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 6px;
+            margin: 12px 0;
+        }
+        
+        .scale-number {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .scale-number:hover, .scale-number.selected {
+            border-color: #4facfe;
+            background: #4facfe;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .option-btn {
+            padding: 12px 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 2px solid #e9ecef;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .option-btn:hover, .option-btn.selected {
+            border-color: #4facfe;
+            background: #4facfe;
+            color: white;
+        }
+        
+        .notes-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .notes-header {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .notes-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #333;
+            resize: none;
+            outline: none;
+            min-height: 40px;
+        }
+        
+        .notes-input::placeholder {
+            color: #8E8E93;
+        }
+        
+        .navigation {
+            padding: 18px 20px 25px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .insights-preview {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 12px;
+            color: #e65100;
+        }
+        
+        .insights-preview strong {
+            color: #bf360c;
+        }
+        
+        .conditional-section {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .conditional-header {
+            font-size: 13px;
+            color: #1976d2;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .mood-btn {
+            padding: 10px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 2px solid #e9ecef;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .mood-btn:hover, .mood-btn.selected {
+            border-color: #4facfe;
+            background: #4facfe;
+            color: white;
+        }
+        
+        .completion-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 30px;
+        }
+        
+        .completion-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .completion-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .completion-subtitle {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        
+        .insight-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        .insight-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .insight-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="screen">
+            <div class="checkin-container">
+                <!-- Header -->
+                <div class="header">
+                    <div class="time">Thursday, June 20 • 7:42 AM</div>
+                    <div class="greeting">Good morning! ☀️</div>
+                    <div class="subtitle">Let's check in on how you're feeling</div>
+                </div>
+                
+                <!-- Progress Section -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <div class="progress-text">Morning Check-in</div>
+                        <div class="time-estimate">2-3 min</div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div class="chapters">
+                        <div class="chapter active" id="chapter1">
+                            <div class="chapter-icon">💤</div>
+                            Vital Rhythms
+                        </div>
+                        <div class="chapter upcoming" id="chapter2">
+                            <div class="chapter-icon">🎯</div>
+                            Body Signals
+                        </div>
+                        <div class="chapter upcoming" id="chapter3">
+                            <div class="chapter-icon">🧠</div>
+                            Mood & Mindset
+                        </div>
+                        <div class="chapter upcoming" id="chapter4">
+                            <div class="chapter-icon">🥗</div>
+                            Fuel & Care
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question Container -->
+                <div class="question-container">
+                    <div class="question-number" id="questionNumber">Question 1 of 18 • Vital Rhythms</div>
+                    <div class="question" id="questionText">How many hours did you sleep last night?</div>
+                    
+                    <div id="answerContainer">
+                        <div class="numeric-input">
+                            <input type="number" class="time-input" placeholder="7.5" step="0.25" min="0" max="12">
+                            <span style="color: #666; font-weight: 500;">hours</span>
+                        </div>
+                    </div>
+                    
+                    <div class="insights-preview" id="insightsPreview">
+                        <strong>💡 Multi-dimensional insight:</strong> Sleep duration affects your pain sensitivity, sugar cravings, exercise performance, and emotional regulation throughout the day.
+                    </div>
+                    
+                    <!-- Notes Section (shown at end of each chapter) -->
+                    <div class="notes-section" id="notesSection" style="display: none;">
+                        <div class="notes-header">Optional notes (anything else important?)</div>
+                        <textarea class="notes-input" placeholder="Add any other details here that you think are important or you don't want to forget" maxlength="200"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="navigation">
+                    <button class="btn btn-secondary" id="backBtn" disabled>Back</button>
+                    <button class="btn btn-primary" id="nextBtn">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // CHAPTER 1: VITAL RHYTHMS (8 questions)
+            {
+                chapter: 1,
+                chapterName: "Vital Rhythms",
+                number: 1,
+                text: "How many hours did you sleep last night?",
+                type: "numeric",
+                placeholder: "7.5",
+                suffix: "hours",
+                insight: "Sleep duration affects your pain sensitivity, sugar cravings, exercise performance, and emotional regulation throughout the day."
+            },
+            {
+                chapter: 1,
+                chapterName: "Vital Rhythms", 
+                number: 2,
+                text: "Rate your overall sleep quality - considering how deeply you slept and how restful it felt",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["Terrible", "Excellent"],
+                insight: "Sleep quality often predicts your entire day better than sleep duration - it affects cognitive function, emotional regulation, and physical recovery."
+            },
+            {
+                chapter: 1,
+                chapterName: "Vital Rhythms",
+                number: 3,
+                text: "How many times did you wake up during the night?",
+                type: "options",
+                options: ["0 times", "1 time", "2 times", "3 times", "4+ times"],
+                insight: "Sleep continuity affects memory consolidation and next-day cognitive function. Frequent wake-ups often correlate with increased afternoon fatigue."
+            },
+            {
+                chapter: 1,
+                chapterName: "Vital Rhythms",
+                number: 4,
+                text: "What time did you go to bed last night?",
+                type: "time",
+                insight: "Consistent bedtimes improve sleep quality by 35% on average. Bedtime consistency matters more than the actual time."
+            },
+            {
+                chapter: 1,
+                chapterName: "Vital Rhythms",
+                number: 5,
+                text: "What time did you wake up today?",
+                type: "time",
+                insight: "Wake time consistency is often more important than bedtime consistency. Natural wake-ups correlate with 40% more stable daily energy."
+            },
+            {
+                chapter: 1,
+                chapterName: "Vital Rhythms",
+                number: 6,
+                text: "How refreshed do you feel this morning?",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["Exhausted", "Fully refreshed"],
+                insight: "This metric predicts your entire day better than sleep duration - it correlates with energy stability, cognitive performance, and mood regulation."
+            },
+            {
+                chapter: 1,
+                chapterName: "Vital Rhythms",
+                number: 7,
+                text: "Rate your energy level right now",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["No energy", "Highly energetic"],
+                insight: "Morning energy affects food cravings, exercise motivation, and decision-making all day. Energy <4 predicts sugar cravings within 2 hours."
+            },
+            {
+                chapter: 1,
+                chapterName: "Vital Rhythms",
+                number: 8,
+                text: "What's your predominant mood this morning?",
+                type: "mood",
+                options: ["Calm", "Content", "Anxious", "Irritable", "Sad", "Motivated", "Overwhelmed", "Neutral", "Hopeful", "Energetic", "Focused", "Restless"],
+                insight: "Morning mood sets the tone for social interactions, stress resilience, and daily performance throughout the day.",
+                hasNotes: true
+            },
+            
+            // CHAPTER 2: BODY SIGNALS (4 questions)
+            {
+                chapter: 2,
+                chapterName: "Body Signals",
+                number: 9,
+                text: "Are you experiencing any pain this morning?",
+                type: "options",
+                options: ["No pain", "Mild pain (1-3)", "Moderate pain (4-6)", "Severe pain (7-10)"],
+                insight: "Morning pain affects mood, exercise capacity, and sleep quality. Pain >5 can reduce next night's sleep quality by 30%."
+            },
+            {
+                chapter: 2,
+                chapterName: "Body Signals",
+                number: 10,
+                text: "Rate your overall physical comfort right now",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["Very uncomfortable", "Very comfortable"],
+                insight: "Physical comfort affects mood, motivation, and concentration. Comfort <6 correlates with 50% higher afternoon fatigue."
+            },
+            {
+                chapter: 2,
+                chapterName: "Body Signals",
+                number: 11,
+                text: "Are you experiencing any of these symptoms?",
+                type: "multi-select",
+                options: ["Headache", "Dizziness", "Nausea", "Congestion", "Digestive discomfort", "Muscle tension", "Skin issues", "None"],
+                insight: "Multiple symptoms often cluster together and can indicate patterns related to sleep, stress, nutrition, or environmental factors."
+            },
+            {
+                chapter: 2,
+                chapterName: "Body Signals",
+                number: 12,
+                text: "How is your physical energy level this morning?",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["Physically depleted", "Physically energetic"],
+                insight: "Physical energy affects exercise performance and daily activity completion. <5 increases likelihood of skipping planned exercise by 85%.",
+                hasNotes: true
+            },
+            
+            // CHAPTER 3: MOOD & MINDSET (3 questions)
+            {
+                chapter: 3,
+                chapterName: "Mood & Mindset",
+                number: 13,
+                text: "Rate your mental clarity this morning",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["Very foggy", "Very clear"],
+                insight: "Mental clarity predicts decision-making quality and cognitive performance. Clarity <6 correlates with 70% more impulsive food choices."
+            },
+            {
+                chapter: 3,
+                chapterName: "Mood & Mindset",
+                number: 14,
+                text: "How stressful do you expect today to be?",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["Not at all", "Extremely"],
+                insight: "Stress anticipation affects hormone release and energy allocation. Anticipated stress >7 increases cortisol by 40% and reduces sleep quality."
+            },
+            {
+                chapter: 3,
+                chapterName: "Mood & Mindset",
+                number: 15,
+                text: "What's something you appreciate today?",
+                type: "text",
+                placeholder: "Type something you're grateful for...",
+                insight: "Daily gratitude practice correlates with 35% better stress management and 20% improved sleep quality.",
+                hasNotes: true
+            },
+            
+            // CHAPTER 4: FUEL & CARE (3 questions)
+            {
+                chapter: 4,
+                chapterName: "Fuel & Care",
+                number: 16,
+                text: "How hydrated do you feel right now?",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["Very dehydrated", "Optimally hydrated"],
+                insight: "Hydration affects cognitive function, energy levels, and headache prevention. Hydration <5 correlates with 60% higher headache risk."
+            },
+            {
+                chapter: 4,
+                chapterName: "Fuel & Care",
+                number: 17,
+                text: "Did you take your morning medications/supplements?",
+                type: "options",
+                options: ["All taken", "Some taken", "None taken", "Not applicable"],
+                insight: "Medication adherence affects symptom control and treatment effectiveness. Missed morning medications correlate with 45% increase in afternoon symptoms."
+            },
+            {
+                chapter: 4,
+                chapterName: "Fuel & Care",
+                number: 18,
+                text: "Rate your hunger level this morning",
+                type: "scale",
+                scale: [0,1,2,3,4,5,6,7,8,9,10],
+                labels: ["Not hungry", "Extremely hungry"],
+                insight: "Morning hunger patterns reflect metabolic health. Extreme hunger (>8) often follows poor sleep and predicts overeating by 40%.",
+                hasNotes: true
+            }
+        ];
+
+        let currentQuestion = 0;
+        const totalQuestions = questions.length;
+        let selectedAnswers = {};
+        let conditionalQuestions = [];
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            const currentChapter = questions[currentQuestion].chapter;
+            for (let i = 1; i <= 4; i++) {
+                const chapterEl = document.getElementById(`chapter${i}`);
+                if (i < currentChapter) {
+                    chapterEl.className = 'chapter completed';
+                } else if (i === currentChapter) {
+                    chapterEl.className = 'chapter active';
+                } else {
+                    chapterEl.className = 'chapter upcoming';
+                }
+            }
+        }
+
+        function renderQuestion() {
+            const question = questions[currentQuestion];
+            
+            document.getElementById('questionNumber').textContent = 
+                `Question ${question.number} of ${totalQuestions} • ${question.chapterName}`;
+            document.getElementById('questionText').textContent = question.text;
+            
+            const container = document.getElementById('answerContainer');
+            const insightsPreview = document.getElementById('insightsPreview');
+            const notesSection = document.getElementById('notesSection');
+            
+            insightsPreview.innerHTML = `<strong>💡 Multi-dimensional insight:</strong> ${question.insight}`;
+            
+            // Show notes section if this is the last question of a chapter
+            if (question.hasNotes) {
+                notesSection.style.display = 'block';
+            } else {
+                notesSection.style.display = 'none';
+            }
+            
+            if (question.type === 'numeric') {
+                container.innerHTML = `
+                    <div class="numeric-input">
+                        <input type="number" class="time-input" placeholder="${question.placeholder}" step="0.25" min="0" max="12">
+                        <span style="color: #666; font-weight: 500;">${question.suffix}</span>
+                    </div>
+                `;
+            } else if (question.type === 'time') {
+                container.innerHTML = `
+                    <div class="numeric-input">
+                        <input type="time" class="time-input">
+                    </div>
+                `;
+            } else if (question.type === 'text') {
+                container.innerHTML = `
+                    <div class="numeric-input">
+                        <input type="text" class="time-input" placeholder="${question.placeholder}" style="width: 100%; text-align: left; min-width: 200px;">
+                    </div>
+                `;
+            } else if (question.type === 'scale') {
+                const scaleHtml = question.scale.map((num, index) => 
+                    `<div class="scale-number" onclick="selectScale(${index})">${num}</div>`
+                ).join('');
+                
+                container.innerHTML = `
+                    <div class="scale-container">
+                        <div class="scale">${scaleHtml}</div>
+                        <div class="scale-labels">
+                            <span>${question.labels[0]}</span>
+                            <span>${question.labels[1]}</span>
+                        </div>
+                    </div>
+                `;
+            } else if (question.type === 'mood') {
+                const optionsHtml = question.options.map(option => 
+                    `<button class="mood-btn" onclick="selectMood('${option}')">${option}</button>`
+                ).join('');
+                
+                container.innerHTML = `
+                    <div class="mood-grid">${optionsHtml}</div>
+                `;
+            } else if (question.type === 'options') {
+                const optionsHtml = question.options.map(option => 
+                    `<button class="option-btn" onclick="selectOption('${option}')">${option}</button>`
+                ).join('');
+                
+                container.innerHTML = `
+                    <div class="option-grid">${optionsHtml}</div>
+                `;
+            } else if (question.type === 'multi-select') {
+                const optionsHtml = question.options.map(option => 
+                    `<button class="option-btn" onclick="toggleMultiSelect('${option}')">${option}</button>`
+                ).join('');
+                
+                container.innerHTML = `
+                    <div class="option-grid">${optionsHtml}</div>
+                `;
+            }
+            
+            // Add conditional questions if triggered
+            if (currentQuestion === 2 && selectedAnswers[2] && !selectedAnswers[2].includes('0 times')) {
+                container.innerHTML += `
+                    <div class="conditional-section">
+                        <div class="conditional-header">Follow-up: What caused most of your wake-ups?</div>
+                        <div class="option-grid">
+                            <button class="option-btn" onclick="selectConditional('bathroom')">Bathroom</button>
+                            <button class="option-btn" onclick="selectConditional('pain')">Pain/discomfort</button>
+                            <button class="option-btn" onclick="selectConditional('temperature')">Too hot/cold</button>
+                            <button class="option-btn" onclick="selectConditional('thoughts')">Racing thoughts</button>
+                            <button class="option-btn" onclick="selectConditional('noise')">Noise</button>
+                            <button class="option-btn" onclick="selectConditional('unknown')">Unknown</button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            updateProgress();
+            
+            document.getElementById('backBtn').disabled = currentQuestion === 0;
+            
+            if (currentQuestion === totalQuestions - 1) {
+                document.getElementById('nextBtn').textContent = 'Complete Check-in';
+                document.getElementById('nextBtn').style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            } else {
+                const nextChapter = questions[currentQuestion + 1] ? questions[currentQuestion + 1].chapter : null;
+                const currentChapter = questions[currentQuestion].chapter;
+                
+                if (nextChapter && nextChapter !== currentChapter) {
+                    document.getElementById('nextBtn').textContent = 'Next Chapter';
+                } else {
+                    document.getElementById('nextBtn').textContent = 'Next';
+                }
+                document.getElementById('nextBtn').style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+            }
+        }
+
+        function selectScale(index) {
+            document.querySelectorAll('.scale-number').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.scale-number')[index].classList.add('selected');
+            selectedAnswers[currentQuestion] = questions[currentQuestion].scale[index];
+        }
+
+        function selectMood(mood) {
+            document.querySelectorAll('.mood-btn').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            selectedAnswers[currentQuestion] = mood;
+        }
+
+        function selectOption(option) {
+            document.querySelectorAll('.option-btn').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            selectedAnswers[currentQuestion] = option;
+        }
+
+        function toggleMultiSelect(option) {
+            const btn = event.target;
+            btn.classList.toggle('selected');
+            
+            if (!selectedAnswers[currentQuestion]) {
+                selectedAnswers[currentQuestion] = [];
+            }
+            
+            if (btn.classList.contains('selected')) {
+                if (!selectedAnswers[currentQuestion].includes(option)) {
+                    selectedAnswers[currentQuestion].push(option);
+                }
+            } else {
+                selectedAnswers[currentQuestion] = selectedAnswers[currentQuestion].filter(item => item !== option);
+            }
+            
+            // If "None" is selected, deselect all others
+            if (option === 'None' && btn.classList.contains('selected')) {
+                document.querySelectorAll('.option-btn').forEach(el => {
+                    if (el.textContent !== 'None') {
+                        el.classList.remove('selected');
+                    }
+                });
+                selectedAnswers[currentQuestion] = ['None'];
+            }
+            
+            // If any other option is selected, deselect "None"
+            if (option !== 'None' && btn.classList.contains('selected')) {
+                document.querySelectorAll('.option-btn').forEach(el => {
+                    if (el.textContent === 'None') {
+                        el.classList.remove('selected');
+                    }
+                });
+                selectedAnswers[currentQuestion] = selectedAnswers[currentQuestion].filter(item => item !== 'None');
+            }
+        }
+
+        function selectConditional(option) {
+            document.querySelectorAll('.conditional-section .option-btn').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            selectedAnswers[`${currentQuestion}_conditional`] = option;
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                // Show completion screen
+                document.querySelector('.checkin-container').innerHTML = `
+                    <div class="completion-screen">
+                        <div class="completion-icon">🎉</div>
+                        <div class="completion-title">Morning Check-in Complete!</div>
+                        <div class="completion-subtitle">Excellent work! We're analyzing your 18 responses across 4 health domains to identify patterns and provide personalized insights.</div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">📊 Today's Pattern Analysis:</div>
+                            <div class="insight-text">"Your refreshed rating of 8/10 combined with high morning energy (7/10) suggests excellent sleep restoration. This typically leads to stable energy throughout the day and better stress resilience."</div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">🔄 Multi-Domain Correlation:</div>
+                            <div class="insight-text">"Your sleep quality, mood, and physical comfort are all above baseline today. We're tracking how this combination affects your food choices, exercise performance, and evening energy."</div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">📈 Growing Insights (Day 12):</div>
+                            <div class="insight-text">"We've identified 3 strong correlations in your data: sleep quality → next-day energy (89% confidence), hydration → afternoon headaches (76% confidence), and stress anticipation → sleep quality (81% confidence)."</div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="padding: 16px 40px; margin-top: 15px;">View My Health Dashboard</button>
+                        
+                        <div style="margin-top: 20px; font-size: 12px; color: #666;">
+                            Evening check-in reminder set for 8:00 PM
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        // Initialize the first question
+        renderQuestion();
+
+        // Demo: Auto-advance through first few questions to show variety
+        let demoMode = true;
+        if (demoMode) {
+            setTimeout(() => {
+                // Simulate answering question 1 (sleep hours)
+                document.querySelector('.time-input').value = '7.5';
+                selectedAnswers[0] = 7.5;
+                
+                setTimeout(() => {
+                    currentQuestion++;
+                    renderQuestion();
+                    
+                    // Simulate answering question 2 (sleep quality)
+                    setTimeout(() => {
+                        selectScale(8); // Select 8/10 for sleep quality
+                        
+                        setTimeout(() => {
+                            currentQuestion++;
+                            renderQuestion();
+                            
+                            // Simulate answering question 3 (wake ups)
+                            setTimeout(() => {
+                                document.querySelector('.option-btn[onclick*="1 time"]').click();
+                                
+                                setTimeout(() => {
+                                    currentQuestion++;
+                                    renderQuestion();
+                                }, 1500);
+                            }, 1500);
+                        }, 1500);
+                    }, 1000);
+                }, 1500);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
