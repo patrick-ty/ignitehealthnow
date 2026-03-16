@@ -1,0 +1,62 @@
+# Mockup Reference: Prior Work to PRD Mapping
+
+**Purpose:** Bridge document mapping the prior mockups in `docs/mockups/` to the current PRD (`docs/prd/ignitehealth-prd.md`). The existing mockups were created during an earlier "general wellness app" phase. The PRD reframes the entire product around hypothyroidism/Hashimoto's, the Four Legs metabolic framework, estrogen dominance tracking, functional optimal lab ranges, and specific patient personas (Sarah, Maria, Jen, Julie, Dana, Gloria).
+
+**Rule of thumb:** The PRD is the source of truth. Mockups are UX reference only — carry forward interaction patterns and visual design language, not content structure or clinical framing.
+
+---
+
+## Mockup Inventory
+
+### Markdown Specification Files
+
+| File | Relevance | What to Carry Forward | What Changed / Why |
+|------|-----------|----------------------|-------------------|
+| `New App/ignitehealth_onboarding_specification.md` | **High** | 11-screen progressive commitment flow. Mirror screen (Screen 7) that reflects user inputs back. Emotional investment arc. Data model for onboarding profile. Analytics event tracking. Auto-advance on single-select. Screen-by-screen wireframes. Design tokens (colors, typography, spacing, button styles). | Content needs hypothyroidism-specific reframing: symptom list must include the full thyroid/Hashimoto's symptom set (hair shedding, cold intolerance, constipation, puffiness, etc.), not just generic wellness symptoms. Goals must map to PRD personas (prove symptoms are real, understand the Four Legs, bring data to doctor). Healthcare satisfaction framing aligns well with "The Dismissed Patient" persona. The "How We'll Help" screen (Screen 8) must describe pattern detection, lab tracking with functional ranges, and doctor visit reports instead of generic correlation discovery. Commitment framing can stay. |
+| `complete_morning_checkin.md` | **Medium** | Chapter-based structure (Vital Rhythms, Body Signals, Mood & Mindset, Fuel & Care). Notes system per chapter with 200-char limit. NLP keyword extraction concept for notes. Question-level correlation annotations. Database schema for check-in data and notes. | PRD completely restructures the morning check-in around hypothyroidism-specific capture: brain fog severity, cold intolerance, waking basal body temperature, thyroid medication timing/absorption tracking, and conditional logic tied to thyroid markers. The generic "16 core questions across 4 primary domains" is replaced by the PRD's priority-tiered data points (P0/P1/P2) with strict friction budgets (P0 = ~45 sec, P0+P1 = ~90 sec). Keep the chapter-based progress UI pattern and notes system, but remap chapters to PRD sections (How You Woke Up, Body State, Medication & Supplements, Quick Context). |
+| `complete_app_framework_summary.md` | **Medium** | Evening check-in v19 section structure. Photo journal system overview. Correlation engine concept (food-energy, stress-symptoms, activity-recovery, environment-wellness loops). Tab bar navigation structure. Engagement timeline (automated insights progressing to user exploration). Reporting cadence (daily micro-insights, weekly patterns, monthly reports). | PRD replaces the generic wellness correlation engine with hypothyroidism-specific intelligence: Four Legs detection, vicious cycle alerts, estrogen dominance pathway tracking, medication absorption correlation, and cycle-phase symptom mapping. The evening check-in is restructured around bloating/body composition tracking (elevated to its own dedicated section), thyroid-specific symptom chips, and lifestyle inputs mapped to thyroid pathways (not generic wellness). Navigation, engagement timeline, and reporting cadence concepts are useful reference but need content adaptation. |
+| `complete-tracking-framework.md` | **Low** | Comprehensive question tables across 7 generic health domains. Symptom clustering concept (named patterns, user-confirmed relationships). Conditional follow-up question patterns. Bristol Stool Scale reference. Bowel movement tracking. Implementation guidelines for progressive intelligence. | This is the most "general wellness" of all files. The 7 domains (Vital Rhythms, Body Signals, Fuel & Flow, Movement Matrix, Mood & Mindset, Medicine Management, Menstrual Mapping) are replaced by the PRD's hypothyroidism-focused capture architecture. However, several specific patterns are worth preserving: conditional follow-up logic, symptom clustering concept (PRD Section 8 builds on this), Bristol Stool Scale visualization (relevant to thyroid GI symptoms), and the progressive implementation phases for pattern recognition. The menstrual mapping section has some overlap with PRD Section 7 but lacks the estrogen dominance / TBG mechanism framing. |
+| `health-app-complete-framework.md` | **Low** | Detailed question tables with conditional logic. Implementation guidelines for developers. Symptom relationship detection through follow-up questions. User data flow example for named patterns. Development priority ordering. | Similar to `complete-tracking-framework.md` but formatted as developer implementation guidance. The conditional logic patterns and progressive disclosure approach carry forward conceptually. Content is entirely superseded by the PRD's data point mapping (Section 3A.2) and capture architecture. |
+| `complete_photo_journal_system.md` | **High** | Three-tier AI recognition system (high confidence / smart confirmation / honest estimation). FAB camera positioning. Restaurant-specific intelligence (chain vs. independent). Before/after photo portion tracking. Learning and personalization engine. Confidence indicator system. Discrete/stealth mode for public dining. Batch upload mode. Dashboard photoroll layouts (today/week/month views). Advanced filtering system. Evening check-in integration (Q19 completion check). Success metrics and targets. | Photo food journal carries forward almost entirely into PRD Section 5. The three-tier system, confidence indicators, FAB positioning, and restaurant intelligence are all preserved in the PRD. Key additions in the PRD: thyroid-relevant food intelligence (selenium-rich foods, goitrogens, gluten/dairy as thyroid triggers), integration with the bloating correlation engine, and framing photo capture as evidence for the metabolic detective toolkit rather than generic nutrition tracking. The PRD also adds supplement/medication photo capture as a first-class concept. |
+
+### HTML Interactive Mockups
+
+| File | Relevance | What to Carry Forward | What Changed / Why |
+|------|-----------|----------------------|-------------------|
+| `complete_evening_checkin.html` | **Medium** | Full 20-question evening check-in prototype with working navigation, progress bar, conditional sections, custom input fields, scale selectors, and completion screen with insight cards. Purple gradient header design. Pattern selection buttons with icons. | Content is entirely generic wellness. The PRD restructures the evening check-in with hypothyroidism-specific sections (bloating/body composition gets its own block, symptom chips are thyroid-specific, lifestyle inputs map to thyroid pathways). UI interaction patterns (scale selectors, pattern buttons, conditional sections, progress tracking) are solid reference for the Flutter implementation. |
+| `complete_morning_checkin.html` | **Medium** | Full 18-question morning check-in prototype with chapter-based navigation, progress bar, four chapter indicators, multiple input types (numeric, scale, time, text, mood grid, multi-select, options), notes section per chapter, conditional follow-ups, and completion screen with correlation insights. Blue gradient header. | Same as evening: content is generic wellness, but the UI patterns are strong reference. Chapter progress indicators, input type variety, and insight preview cards are worth carrying forward into the Flutter design system. The PRD's morning check-in is shorter and more focused (P0 = ~45 sec) with hypothyroidism-specific questions. |
+| `evening_checkin_interactive_mockup.html` | **Low** | Simpler 3-question evening check-in prototype (energy flow, fatigue, sleep readiness). Basic navigation and scale interaction. | This appears to be an early/simplified version of the evening check-in. Superseded by both `complete_evening_checkin.html` and the PRD. Minimal carry-forward value. |
+| `enhanced_gratitude_v26_clean.html` | **Low** | Gratitude journal UI within the morning check-in flow. Phone-frame mockup with gradient header. | Gratitude practice is not present in the PRD. The PRD focuses morning capture on sleep, body state, medication, and context -- all thyroid-relevant. If gratitude is reintroduced, it would need reframing as a mood/stress data point, not a standalone section. |
+| `enhanced_gratitude_flow.html` | **Low** | Extended gratitude flow with mental health optimization framing. | Same as above. Superseded by the PRD's mood/stress capture in the evening check-in (Section D). The concept of tracking positive states is interesting but not part of the current PRD scope. |
+| `enhanced_gratitude_dashboard_v2.html` | **Superseded** | Gratitude transformation dashboard showing streak tracking, mood trends, and gratitude-specific analytics. | No equivalent in the PRD. The dashboard architecture is entirely different -- PRD Section 16 defines dashboards around symptom trends, lab timelines, correlation insights, cycle-phase overlays, and Four Legs status. This mockup has no carry-forward value for the current product. |
+| `ignitehealth_onboarding.html` | **High** | 3-screen streamlined onboarding prototype: health rating scale (1-10), health priority multi-select (sleep, energy, pain, mood, digestion, weight, symptoms), check-in frequency commitment. Clean UI with progress dots, scale selectors, priority grid with checkmarks, and personalized success message generation. | This is a good interaction pattern reference but the content needs significant expansion. The PRD implies a more comprehensive onboarding aligned with `ignitehealth_onboarding_specification.md` (11 screens). The 3 questions here could serve as a "quick start" path for the Julie persona (low friction, low clinical framing), while the full 11-screen flow serves Sarah/Maria personas who need the emotional investment arc. The priority options must be reframed for hypothyroidism (e.g., "understand what's driving my symptoms" instead of generic "understanding symptoms"). |
+
+---
+
+## Summary: What the PRD Changes
+
+### Fundamental Reframing
+The prior mockups framed IgniteHealth as a general wellness correlation app: "discover how specific lifestyle choices directly impact how they feel." The PRD reframes it as a hypothyroidism-specific health intelligence system: "the personal health intelligence system that reveals what standard medicine misses."
+
+### Structural Changes
+1. **Morning check-in** is restructured around thyroid-specific capture (BBT, medication absorption, cold intolerance, brain fog) with strict friction budgets
+2. **Evening check-in** elevates bloating/body composition to its own section and replaces generic wellness questions with thyroid-specific symptom chips and conditional logic
+3. **Onboarding** must establish the "dismissed patient" emotional frame, not just generic health tracking motivation
+4. **Photo journal** gains thyroid-relevant food intelligence (goitrogens, selenium, gluten/dairy triggers) alongside the general nutrition tracking
+5. **Correlation engine** is replaced by the Four Legs detection system, vicious cycle alerts, and estrogen dominance pathway tracking
+6. **Dashboards** are rebuilt around lab tracking with functional optimal ranges, cycle-phase overlays, and clinical-grade doctor visit reports
+7. **New surfaces** with no mockup precedent: lab entry, doctor visit reports, provider portal, chat agent, research layer
+
+### Preserved Patterns
+These UX/interaction patterns from the mockups carry forward and should inform the Flutter design system:
+- Chapter-based check-in flow with progress indicators
+- Conditional follow-up question logic
+- 0-10 scale selectors (circular number grid)
+- Multi-select symptom chip grids
+- Pattern selection buttons with icons
+- Optional notes per section (200 char)
+- Photo FAB positioning
+- Three-tier confidence indicators for AI food recognition
+- Completion screens with insight preview cards
+- Custom input option ("+ Add your own")
+- Phone-frame visual design language (rounded corners, gradient headers)
