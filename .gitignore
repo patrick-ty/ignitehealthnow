@@ -15,6 +15,31 @@ Thumbs.db
 # Environment
 .env
 .env.*
+*.env.local
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Node
+node_modules/
+
+# Build artifacts
+build/
+dist/
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+
+# Brainstorm sessions
+.superpowers/
