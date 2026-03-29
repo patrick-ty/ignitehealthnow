@@ -45,16 +45,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final authState = ref.read(authStateProvider);
     if (mounted) {
-      setState(() {
-        _isLoading = false;
-        if (!authState.isAuthenticated) {
-          if (authState.error?.contains('confirm') ?? false) {
-            _success = authState.error;
-          } else {
-            _error = authState.error ?? 'Registration failed';
+      _isLoading = false;
+      if (authState.isAuthenticated) {
+        // Signed in immediately (no email confirmation required)
+        context.go('/home');
+      } else if (authState.error?.contains('confirm') ?? false) {
+        // Email confirmation required — redirect to login with message
+        if (mounted) context.go('/login');
+        // Show snackbar after navigation
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Account created! Check your email, then sign in.'),
+                backgroundColor: AppColors.primary,
+                duration: Duration(seconds: 5),
+              ),
+            );
           }
-        }
-      });
+        });
+      } else {
+        setState(() {
+          _error = authState.error ?? 'Registration failed';
+        });
+      }
     }
   }
 
