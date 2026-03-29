@@ -16,7 +16,7 @@ class AuthState {
   });
 
   const AuthState.unknown() : this(status: AuthStatus.unknown);
-  const AuthState.authenticated(Session session)
+  AuthState.authenticated(Session session)
       : this(
           status: AuthStatus.authenticated,
           userId: session.user.id,
