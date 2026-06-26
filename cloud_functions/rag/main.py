@@ -1,3 +1,4 @@
+import base64
 import json
 
 import functions_framework
@@ -61,3 +62,33 @@ def ingest_kb(request):
     store = Store(cfg.database_url, cfg.schema)
     result = run_ingest_kb(prefix, gcs=_GCSReader(), embedder=embedder, store=store, cfg=cfg)
     return (json.dumps(result), 200, {"Content-Type": "application/json"})
+
+
+def run_ingest_user_note(message: dict, *, embedder, store) -> dict:
+    op = message.get("op", "upsert")
+    if op == "delete":
+        deleted = store.delete_user_note(
+            user_id=message["user_id"], source_kind=message["source_kind"],
+            source_id=message["source_id"],
+        )
+        return {"op": "delete", "deleted": deleted}
+    content = message["content"]
+    vec = embedder.embed_query(content)  # single text; query-type fine for short notes
+    written = store.upsert_user_note(
+        user_id=message["user_id"], source_kind=message["source_kind"],
+        source_id=message["source_id"], content=content,
+        occurred_at=message.get("occurred_at"), content_hash=content_hash(content),
+        embedding=vec,
+    )
+    return {"op": "upsert", "written": written}
+
+
+@functions_framework.cloud_event
+def ingest_user_note(cloud_event):
+    data = cloud_event.data["message"]["data"]
+    message = json.loads(base64.b64decode(data).decode("utf-8"))
+    cfg = load_config()
+    embedder = Embedder(cfg.gcp_project, cfg.vertex_location, cfg.embed_model)
+    store = Store(cfg.database_url, cfg.schema)
+    run_ingest_user_note(message, embedder=embedder, store=store)
+    # No return body for CloudEvent handlers; raising re-queues (nack).
