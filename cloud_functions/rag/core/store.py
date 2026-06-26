@@ -1,4 +1,5 @@
 import hashlib
+import json
 import psycopg
 from pgvector.psycopg import register_vector
 
@@ -19,7 +20,6 @@ class Store:
 
     def upsert_kb_chunk(self, *, source_uri, source_type, chunk_index, content,
                         metadata, content_hash, embedding) -> bool:
-        import json
         with self._connect() as conn:
             existing = conn.execute(
                 f"select content_hash from {self._schema}.kb_chunks "
@@ -59,7 +59,8 @@ class Store:
                      content_hash, embedding)
                     values (%s,%s,%s,%s,%s,%s,%s)
                     on conflict (source_kind, source_id) do update set
-                      content=excluded.content, occurred_at=excluded.occurred_at,
+                      user_id=excluded.user_id, content=excluded.content,
+                      occurred_at=excluded.occurred_at,
                       content_hash=excluded.content_hash, embedding=excluded.embedding""",
                 (user_id, source_kind, source_id, content, occurred_at, content_hash, embedding),
             )
@@ -70,8 +71,8 @@ class Store:
         with self._connect() as conn:
             cur = conn.execute(
                 f"delete from {self._schema}.user_note_embeddings "
-                "where source_kind=%s and source_id=%s",
-                (source_kind, source_id),
+                "where user_id=%s and source_kind=%s and source_id=%s",
+                (user_id, source_kind, source_id),
             )
             self._audit(conn, user_id, "ingest_user_note", "delete", [source_id])
             return cur.rowcount

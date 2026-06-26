@@ -92,3 +92,31 @@ def test_search_user_notes_writes_audit(db_url, seed_user):
             (seed_user,),
         ).fetchone()
     assert row is not None
+
+
+@requires_db
+def test_delete_user_note_scoped_by_user_id(db_url, seed_user):
+    """delete_user_note must not delete another user's note (PHI defense-in-depth)."""
+    import psycopg
+    store = Store(db_url)
+    sid = uuid.uuid4()
+    # upsert a note belonging to seed_user
+    store.upsert_user_note(
+        user_id=seed_user, source_kind="journal_note", source_id=sid,
+        content="private note", occurred_at=None,
+        content_hash=content_hash("private note"), embedding=_vec(1.0),
+    )
+    # attempt delete with a DIFFERENT random user_id — must delete 0 rows
+    other_user = uuid.uuid4()
+    deleted = store.delete_user_note(
+        user_id=other_user, source_kind="journal_note", source_id=sid,
+    )
+    assert deleted == 0, "should not delete another user's note"
+    # delete with the correct user_id — must delete exactly 1 row
+    deleted = store.delete_user_note(
+        user_id=seed_user, source_kind="journal_note", source_id=sid,
+    )
+    assert deleted == 1, "should delete own note"
+    # confirm note is gone from search results
+    hits = store.search_user_notes(user_id=seed_user, query_embedding=_vec(1.0), top_k=10)
+    assert not any(h["content"] == "private note" for h in hits)
