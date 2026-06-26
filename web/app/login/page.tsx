@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { authClient } from '@/lib/auth/client'
 import AuthShell from '@/components/layout/AuthShell'
 
 export default function LoginPage() {
@@ -22,13 +22,8 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) throw error
+      const { error } = await authClient.signIn(email, password)
+      if (error) throw new Error(error)
 
       router.push('/dashboard')
     } catch (err) {
@@ -54,18 +49,6 @@ export default function LoginPage() {
         </span>
       }
     >
-      <div className="rounded-lg border border-[#007ACC]/20 bg-[#FFFFFF] p-4 text-sm text-[#212121]">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#007ACC]">Test account</p>
-        <div className="mt-2 space-y-1 text-sm">
-          <p className="break-words">
-            Email: <span className="font-mono text-xs">patrick.ty@comcast.net</span>
-          </p>
-          <p className="break-words">
-            Password: <span className="font-mono text-xs">nIwboz-8vetju-cysbon</span>
-          </p>
-        </div>
-      </div>
-
       <form className="space-y-6" onSubmit={handleLogin}>
         {error && (
           <div className="rounded-md border border-[#9E9E9E]/40 bg-[#FFFFFF] px-4 py-3 text-sm text-[#212121]">

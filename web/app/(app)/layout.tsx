@@ -1,20 +1,13 @@
 import AppShell from '@/components/layout/AppShell'
-import { createClient } from '@/lib/supabase/server'
+import { getServerSession } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  const auth = await getServerSession()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!session?.access_token) {
+  if (!auth) {
     redirect('/login')
   }
 
@@ -25,7 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   try {
     const response = await fetch(`${API_URL}/profile`, {
       headers: {
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${auth.token}`,
       },
       cache: 'no-store',
     })
@@ -47,7 +40,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <AppShell profile={profile} fallbackUserId={user?.id ?? null}>
+    <AppShell profile={profile} fallbackUserId={auth.userId}>
       {children}
     </AppShell>
   )

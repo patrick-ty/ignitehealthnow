@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { authClient } from '@/lib/auth/client'
 import AuthShell from '@/components/layout/AuthShell'
 
 export default function RegisterPage() {
@@ -34,13 +34,8 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-
-      if (error) throw error
+      const { error } = await authClient.signUp(email, password)
+      if (error) throw new Error(error)
 
       // Redirect to profile setup
       router.push('/profile/setup')

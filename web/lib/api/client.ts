@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/client'
+import { authClient } from '@/lib/auth/client'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -28,15 +28,14 @@ export interface ProfileUpdate {
 }
 
 async function getAuthHeaders() {
-  const supabase = createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
+  const token = await authClient.getToken()
+
+  if (!token) {
     throw new Error('Not authenticated')
   }
-  
+
   return {
-    'Authorization': `Bearer ${session.access_token}`,
+    'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json',
   }
 }
@@ -45,14 +44,14 @@ export const api = {
   async getProfile(): Promise<Profile> {
     const headers = await getAuthHeaders()
     const response = await fetch(`${API_URL}/profile`, { headers })
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch profile')
     }
-    
+
     return response.json()
   },
-  
+
   async updateProfile(data: ProfileUpdate): Promise<Profile> {
     const headers = await getAuthHeaders()
     const response = await fetch(`${API_URL}/profile`, {
@@ -60,11 +59,11 @@ export const api = {
       headers,
       body: JSON.stringify(data),
     })
-    
+
     if (!response.ok) {
       throw new Error('Failed to update profile')
     }
-    
+
     return response.json()
   },
 }

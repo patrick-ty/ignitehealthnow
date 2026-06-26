@@ -1,19 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-
-export default async function DashboardPage() {
-  const supabase = await createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  const { data: userData } = await supabase.auth.getUser()
-
-  const user = userData?.user || session?.user
-
-  if (!user || !session?.access_token) {
-    redirect('/login')
-  }
-
+// Auth is enforced by the (app) layout gate — this is a pure placeholder.
+export default function DashboardPage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
       <section className="rounded-xl border border-[#9E9E9E]/30 bg-[#FFFFFF] p-10 text-center shadow-sm">
