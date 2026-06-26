@@ -58,3 +58,46 @@ _lm.TextEmbeddingModel = _FakeModel
 _lm.TextEmbeddingInput = _FakeTextEmbeddingInput
 sys.modules.setdefault("vertexai", _vertexai)
 sys.modules.setdefault("vertexai.language_models", _lm)
+
+import os
+import uuid
+
+
+def _db_url():
+    return os.environ.get("RAG_TEST_DATABASE_URL")
+
+
+requires_db = pytest.mark.skipif(_db_url() is None, reason="RAG_TEST_DATABASE_URL not set")
+
+
+@pytest.fixture
+def db_url():
+    url = _db_url()
+    assert url, "guarded by requires_db"
+    return url
+
+
+@pytest.fixture
+def seed_user(db_url):
+    """Insert a throwaway auth.users row; return its id; clean up after."""
+    import psycopg
+
+    uid = uuid.uuid4()
+    with psycopg.connect(db_url, autocommit=True) as conn:
+        conn.execute("insert into auth.users (id) values (%s)", (uid,))
+    yield uid
+    with psycopg.connect(db_url, autocommit=True) as conn:
+        conn.execute("delete from auth.users where id = %s", (uid,))
+
+
+@pytest.fixture(autouse=True)
+def _clean_rag_tables(request):
+    """Truncate rag tables around DB-backed tests only."""
+    if _db_url() is None or "db_url" not in request.fixturenames:
+        yield
+        return
+    import psycopg
+
+    with psycopg.connect(_db_url(), autocommit=True) as conn:
+        conn.execute("truncate rag.kb_chunks, rag.user_note_embeddings, rag.user_note_access_audit")
+    yield
