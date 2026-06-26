@@ -123,8 +123,27 @@ ALTER TABLE rag.user_note_embeddings ENABLE ROW LEVEL SECURITY;
 Free-text note `content` is PHI but must be stored as **readable plaintext** so it
 can be fed into prompts as retrieval context — it cannot be KMS-envelope-encrypted
 and still be usable. Protection relies on: **RLS + Postgres at-rest disk encryption
-+ `rag` schema isolation**, treated like any readable PHI column. This is an
-explicit, approved trade-off given the HIPAA-ready posture.
++ `rag` schema isolation + access audit logging**, treated like any readable PHI
+column. This is an explicit, approved trade-off given the HIPAA-ready posture.
+
+**Reframe — where the real exposure is:** the at-rest column encryption question is
+secondary, because RAG necessarily transmits the note text as plaintext to two
+third parties when it is *used*: to **Vertex AI** (to embed it) and to the **LLM**
+(in the prompt, via the API). The governing compliance controls are therefore:
+
+- **BAAs** with every party that touches the text — Supabase (storage), Google
+  Cloud / Vertex AI (embedding), and the LLM provider (prompt, API-side). **This is
+  a hard dependency** (see §9); plaintext-vs-encrypted column is moot if a BAA is
+  missing. HIPAA's encryption-at-rest rule is *addressable* — disk encryption + RLS
+  + access controls + audit is a recognized equivalent safeguard set.
+- **RLS** (per-user isolation) — the single most important control; already in design.
+- **Data minimization** — embed only free-text notes, never the structured numbers
+  (the hybrid model already enforces this).
+- **Access audit logging** — log who/what accessed user-note rows (metadata only,
+  never content). See §7.
+- **Deletion** — `ON DELETE CASCADE` purges a user's vectors on account deletion.
+
+> Not legal advice — final PHI posture requires qualified compliance sign-off.
 
 ## 5. Entrypoints
 
@@ -182,6 +201,14 @@ No LLM, no prompt-building, no structured health lookups. User query scoped by
   tagged `metadata.lab_name`. Atomic chunks retrieve more precisely than prose.
 - **User notes**: short — embed whole; split only if over the window (rare).
 
+**No manual pre-scan of the book is required** — the structure-aware splitter adapts
+to each document's real headings at ingestion time. However, during implementation,
+pull 1–2 sample files from `ignitehealth-rag-source-prod` to confirm the source
+**format** (clean markdown with headings → works as-is; structureless PDF-extracted
+text → falls back to plain windowing; table-heavy lab guides → per-marker chunking).
+Chunk size and top-k stay config knobs, tuned **empirically** against real retrieval
+quality after first ingestion, not guessed up front.
+
 **Embedding** (`core/embeddings.py`):
 - Vertex AI `text-embedding-005`, 768-dim, cosine. One client wrapper for all
   entrypoints — single place that knows model id, dimension, batching.
@@ -215,6 +242,11 @@ No LLM, no prompt-building, no structured health lookups. User query scoped by
 - **Connections:** pooled, initialized once per warm instance.
 - **Observability:** structured logs (request id, entrypoint, counts, latency).
   Logs **never** include user-note `content` (PHI); KB content is fine to log.
+- **PHI access audit log:** on any access to `rag.user_note_embeddings` (retrieve
+  hits, ingest upsert/delete), emit an audit record — `{timestamp, user_id,
+  entrypoint, source_id(s), op}` — **metadata only, never content**. Supports
+  HIPAA access auditability. Destination (dedicated audit table vs. structured log
+  sink) is an implementation detail for the plan.
 
 ## 8. Testing
 
@@ -231,7 +263,11 @@ No LLM, no prompt-building, no structured health lookups. User query scoped by
 1. **API-side work:** publishing to `rag-user-note-ingest` on journal writes;
    calling `retrieve`; assembling the prompt; the LLM call + §10.3 guardrails.
    Separate work in `api/`.
-2. **Provisioning checklist** (infra-as-code may live in `infra/` later):
+2. **Compliance prerequisite (hard dependency, before user-note embedding ships):**
+   confirm signed BAAs are in place with **Supabase**, **Google Cloud / Vertex AI**,
+   and the **LLM provider**. Pin Vertex + Supabase to US regions if residency is
+   required. Plaintext + RLS storage is only defensible once these exist.
+3. **Provisioning checklist** (infra-as-code may live in `infra/` later):
    - Create `rag` schema, `vector` extension, tables + RLS policy (migration).
    - Create Pub/Sub topic `rag-user-note-ingest` + dead-letter topic.
    - Create the function's service account + IAM bindings above.
