@@ -5,12 +5,12 @@ import time
 
 import functions_framework
 
-logger = logging.getLogger("rag")
-
 from core.chunking import chunk_book, chunk_lab_reference
 from core.config import load_config
 from core.embeddings import Embedder
 from core.store import Store, content_hash
+
+logger = logging.getLogger("rag")
 
 
 class _GCSReader:
