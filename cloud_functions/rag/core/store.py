@@ -83,9 +83,9 @@ class Store:
         with self._connect() as conn:
             rows = conn.execute(
                 f"""select content, source_type, source_uri, metadata,
-                       1 - (embedding <=> %s) as score
+                       1 - (embedding <=> %s::vector) as score
                     from {self._schema}.kb_chunks
-                    order by embedding <=> %s limit %s""",
+                    order by embedding <=> %s::vector limit %s""",
                 (query_embedding, query_embedding, top_k),
             ).fetchall()
         return [
@@ -98,10 +98,10 @@ class Store:
         with self._connect() as conn:
             rows = conn.execute(
                 f"""select id, content, source_kind, occurred_at,
-                       1 - (embedding <=> %s) as score
+                       1 - (embedding <=> %s::vector) as score
                     from {self._schema}.user_note_embeddings
                     where user_id = %s
-                    order by embedding <=> %s limit %s""",
+                    order by embedding <=> %s::vector limit %s""",
                 (query_embedding, user_id, query_embedding, top_k),
             ).fetchall()
             source_ids = [r[0] for r in rows]
