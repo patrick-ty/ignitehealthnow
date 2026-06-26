@@ -75,15 +75,17 @@ class AuthService:
             alg = None
 
         try:
-            if alg == "RS256":
+            if alg in ("RS256", "ES256"):
+                # Asymmetric keys (RSA or EC) verified via Supabase JWKS.
+                # Newer Supabase projects issue ES256 (EC) access tokens by default.
                 key = self._select_key(kid)
                 if not key:
                     raise self._unauthorized()
-                public_key = jwk.construct(key)
+                public_key = jwk.construct(key, algorithm=alg)
                 payload = jwt.decode(
                     token,
                     public_key.to_pem().decode(),
-                    algorithms=["RS256"],
+                    algorithms=[alg],
                     options={"verify_aud": False},
                 )
             elif alg == "HS256":
