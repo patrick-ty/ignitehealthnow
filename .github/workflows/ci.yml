@@ -65,3 +65,35 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+  rag:
+    name: RAG (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloud_functions/rag
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      RAG_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install -r requirements-dev.txt
+      - name: Prepare auth stub + apply migration
+        run: |
+          psql "$RAG_TEST_DATABASE_URL" -c "create schema if not exists auth; create table if not exists auth.users (id uuid primary key); create or replace function auth.uid() returns uuid language sql stable as \$\$ select null::uuid \$\$;"
+          psql "$RAG_TEST_DATABASE_URL" -f ../../spec/migrations/02_rag_schema.sql
+      - name: Pytest
+        run: python -m pytest tests/ -v
