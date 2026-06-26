@@ -34,7 +34,8 @@ def test_kb_search_ranks_by_cosine(db_url):
 
 
 @requires_db
-def test_user_note_rls_isolation(db_url, seed_user):
+def test_user_note_sql_isolation(db_url, seed_user):
+    # Verifies the explicit WHERE user_id SQL filter (the function's isolation layer). RLS(auth.uid()) protects the JWT/PostgREST path and is not exercised by this service-role/superuser connection.
     store = Store(db_url)
     other = seed_user  # one real user
     # create a second real user inline
@@ -59,6 +60,44 @@ def test_user_note_rls_isolation(db_url, seed_user):
     finally:
         with psycopg.connect(db_url, autocommit=True) as conn:
             conn.execute("delete from auth.users where id = %s", (other2,))
+
+
+@requires_db
+def test_upsert_user_note_does_not_reassign_owner(db_url, seed_user):
+    import psycopg
+    store = Store(db_url)
+    owner = seed_user
+    intruder = uuid.uuid4()
+    with psycopg.connect(db_url, autocommit=True) as conn:
+        conn.execute("insert into auth.users (id) values (%s)", (intruder,))
+    try:
+        sid = uuid.uuid4()
+        # upsert a note owned by seed_user
+        result_owner = store.upsert_user_note(
+            user_id=owner, source_kind="journal_note", source_id=sid,
+            content="owner-A", occurred_at=None, content_hash=content_hash("owner-A"),
+            embedding=_vec(1.0),
+        )
+        assert result_owner is True
+
+        # attempt to overwrite same source_kind+source_id from a different user — must return False
+        result_intruder = store.upsert_user_note(
+            user_id=intruder, source_kind="journal_note", source_id=sid,
+            content="intruder-B", occurred_at=None, content_hash=content_hash("intruder-B"),
+            embedding=_vec(2.0),
+        )
+        assert result_intruder is False, "different-owner upsert must return False"
+
+        # owner still sees original content
+        hits_owner = store.search_user_notes(user_id=owner, query_embedding=_vec(1.0), top_k=10)
+        assert [h["content"] for h in hits_owner] == ["owner-A"], "owner content must be preserved"
+
+        # intruder sees nothing
+        hits_intruder = store.search_user_notes(user_id=intruder, query_embedding=_vec(1.0), top_k=10)
+        assert hits_intruder == [], "intruder must see no notes"
+    finally:
+        with psycopg.connect(db_url, autocommit=True) as conn:
+            conn.execute("delete from auth.users where id = %s", (intruder,))
 
 
 @requires_db

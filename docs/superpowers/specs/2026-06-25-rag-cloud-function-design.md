@@ -116,7 +116,8 @@ CREATE TABLE rag.user_note_embeddings (
 CREATE INDEX ON rag.user_note_embeddings USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX ON rag.user_note_embeddings (user_id);
 ALTER TABLE rag.user_note_embeddings ENABLE ROW LEVEL SECURITY;
--- RLS policy: rows scoped to auth.uid(); the function also filters by user_id in SQL (defense in depth).
+-- RLS policy: protects the JWT/PostgREST (authenticated role) path; scoped to auth.uid().
+-- The function uses a service-role/BYPASSRLS connection and isolates users via WHERE user_id = $1.
 ```
 
 ### PHI handling decision
@@ -187,8 +188,8 @@ POST /retrieve  { user_id, query, top_k_kb?=6, top_k_user?=4 }
        { kb:   [{content, source_type, source_uri, metadata, score}],
          notes:[{content, source_kind, occurred_at, score}] }
 ```
-No LLM, no prompt-building, no structured health lookups. User query scoped by
-`user_id` in SQL **and** RLS (two layers).
+No LLM, no prompt-building, no structured health lookups. User query scoped by `user_id` in SQL (the function's BYPASSRLS connection); RLS
+(`auth.uid()`) isolates the separate JWT/PostgREST access path.
 
 ## 6. Chunking & Embedding
 
@@ -229,7 +230,9 @@ quality after first ingestion, not guessed up front.
 **Trust boundaries (PHI defense in depth):**
 - `retrieve` / `ingest_kb` are **not public** — reachable only by the API (IAM
   invoker or Secret-Manager shared token).
-- User-note queries filtered by `user_id` in SQL **and** RLS — independent layers.
+- User-note queries filtered by `user_id` in SQL (the function's service-role/BYPASSRLS
+  connection, one isolation layer per access path); RLS (`auth.uid()`) isolates the
+  JWT/PostgREST path separately.
 - The function's DB role has `SELECT/INSERT/UPDATE/DELETE` on `rag.*` only — no
   reach into `pii` or `public`.
 

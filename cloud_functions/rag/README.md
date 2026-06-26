@@ -18,11 +18,16 @@ python -m pytest tests/ -v            # DB tests skip unless RAG_TEST_DATABASE_U
 ```
 
 ## Provisioning checklist (one-time)
-- [ ] Enable `vector` extension and apply `spec/migrations/02_rag_schema.sql`.
+- [ ] Enable `vector` extension; apply `spec/migrations/02_rag_schema.sql` **after**
+      Supabase's `auth` schema exists (the migration references `auth.users`).
 - [ ] Create Pub/Sub topic `rag-user-note-ingest` + a dead-letter topic.
 - [ ] Create the function service account with: `roles/aiplatform.user`,
       `roles/secretmanager.secretAccessor`, `roles/storage.objectViewer` on
       `ignitehealth-rag-source-prod`, `roles/pubsub.subscriber` on the topic.
+- [ ] The function's DB connection must use a **service-role/BYPASSRLS** role.
+      User isolation is enforced via the explicit `WHERE user_id = $1` SQL filter in
+      every query. RLS (`auth.uid()`) protects the separate JWT/PostgREST access path
+      and does not apply to the BYPASSRLS role by design.
 - [ ] Store the Postgres connection string in Secret Manager as `rag-database-url`;
       set `RAG_DB_SECRET` to its version resource name.
 - [ ] Seed `gs://ignitehealth-rag-source-prod` with `book/` (markdown) and `lab/`

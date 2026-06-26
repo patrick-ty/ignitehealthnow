@@ -41,11 +41,30 @@ create index if not exists user_note_embeddings_user_id_idx
 
 alter table rag.user_note_embeddings enable row level security;
 
--- RLS backstop: any auth.uid()-scoped path sees only its own rows.
--- The function additionally filters by user_id in SQL (defense in depth).
+-- Isolation model (two access paths, one layer each):
+--   1. The RAG cloud function connects with a service-role/BYPASSRLS role and
+--      isolates users via an explicit WHERE user_id = $1 filter in every query.
+--      RLS does NOT apply to that role by design (auth.uid() is null on a direct
+--      connection, so an RLS-subject role would be blocked entirely).
+--   2. Any JWT/PostgREST access (e.g. the Supabase client with a user token) runs
+--      as the 'authenticated' role, which IS subject to these RLS policies scoped
+--      to auth.uid(). Do NOT use FORCE ROW LEVEL SECURITY here -- it would subject
+--      the function's role to RLS and break it.
 drop policy if exists user_note_owner_select on rag.user_note_embeddings;
 create policy user_note_owner_select on rag.user_note_embeddings
     for select using (user_id = auth.uid());
+
+drop policy if exists user_note_owner_insert on rag.user_note_embeddings;
+create policy user_note_owner_insert on rag.user_note_embeddings
+    for insert with check (user_id = auth.uid());
+
+drop policy if exists user_note_owner_update on rag.user_note_embeddings;
+create policy user_note_owner_update on rag.user_note_embeddings
+    for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists user_note_owner_delete on rag.user_note_embeddings;
+create policy user_note_owner_delete on rag.user_note_embeddings
+    for delete using (user_id = auth.uid());
 
 -- PHI access audit — metadata only, never content.
 create table if not exists rag.user_note_access_audit (

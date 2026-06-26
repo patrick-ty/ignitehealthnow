@@ -53,19 +53,21 @@ class Store:
             if existing and existing[0] == content_hash:
                 self._audit(conn, user_id, "ingest_user_note", "upsert", [source_id])
                 return False
-            conn.execute(
+            row = conn.execute(
                 f"""insert into {self._schema}.user_note_embeddings
                     (user_id, source_kind, source_id, content, occurred_at,
                      content_hash, embedding)
                     values (%s,%s,%s,%s,%s,%s,%s)
                     on conflict (source_kind, source_id) do update set
-                      user_id=excluded.user_id, content=excluded.content,
+                      content=excluded.content,
                       occurred_at=excluded.occurred_at,
-                      content_hash=excluded.content_hash, embedding=excluded.embedding""",
+                      content_hash=excluded.content_hash, embedding=excluded.embedding
+                    where {self._schema}.user_note_embeddings.user_id = excluded.user_id
+                    returning id""",
                 (user_id, source_kind, source_id, content, occurred_at, content_hash, embedding),
-            )
+            ).fetchone()
             self._audit(conn, user_id, "ingest_user_note", "upsert", [source_id])
-            return True
+            return row is not None
 
     def delete_user_note(self, *, user_id, source_kind, source_id) -> int:
         with self._connect() as conn:

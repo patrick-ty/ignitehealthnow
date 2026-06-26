@@ -1,7 +1,11 @@
 import base64
 import json
+import logging
+import time
 
 import functions_framework
+
+logger = logging.getLogger("rag")
 
 from core.chunking import chunk_book, chunk_lab_reference
 from core.config import load_config
@@ -60,7 +64,10 @@ def ingest_kb(request):
     cfg = load_config()
     embedder = Embedder(cfg.gcp_project, cfg.vertex_location, cfg.embed_model)
     store = Store(cfg.database_url, cfg.schema)
+    t0 = time.monotonic()
     result = run_ingest_kb(prefix, gcs=_GCSReader(), embedder=embedder, store=store, cfg=cfg)
+    ms = round((time.monotonic() - t0) * 1000)
+    logger.info(json.dumps({"entrypoint": "ingest_kb", "ms": ms, **result}))
     return (json.dumps(result), 200, {"Content-Type": "application/json"})
 
 
@@ -90,7 +97,16 @@ def ingest_user_note(cloud_event):
     cfg = load_config()
     embedder = Embedder(cfg.gcp_project, cfg.vertex_location, cfg.embed_model)
     store = Store(cfg.database_url, cfg.schema)
+    t0 = time.monotonic()
     run_ingest_user_note(message, embedder=embedder, store=store)
+    ms = round((time.monotonic() - t0) * 1000)
+    logger.info(json.dumps({
+        "entrypoint": "ingest_user_note",
+        "ms": ms,
+        "user_id": message.get("user_id"),
+        "source_id": message.get("source_id"),
+        "op": message.get("op", "upsert"),
+    }))
     # No return body for CloudEvent handlers; raising re-queues (nack).
 
 
@@ -114,5 +130,14 @@ def retrieve(request):
     cfg = load_config()
     embedder = Embedder(cfg.gcp_project, cfg.vertex_location, cfg.embed_model)
     store = Store(cfg.database_url, cfg.schema)
+    t0 = time.monotonic()
     result = run_retrieve(payload, embedder=embedder, store=store, cfg=cfg)
+    ms = round((time.monotonic() - t0) * 1000)
+    logger.info(json.dumps({
+        "entrypoint": "retrieve",
+        "ms": ms,
+        "user_id": payload.get("user_id"),
+        "kb": len(result["kb"]),
+        "notes": len(result["notes"]),
+    }))
     return (json.dumps(result), 200, {"Content-Type": "application/json"})

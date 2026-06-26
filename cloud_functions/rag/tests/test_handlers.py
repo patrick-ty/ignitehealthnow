@@ -1,6 +1,5 @@
-from core.chunking import Chunk
 from core.config import load_config
-from main import run_ingest_kb
+from main import run_ingest_kb, run_ingest_user_note, run_retrieve
 
 
 class FakeGCS:
@@ -44,8 +43,6 @@ def test_run_ingest_kb_chunks_embeds_and_counts():
     assert result["chunks_embedded"] + result["chunks_skipped"] >= 1
     assert result["chunks_skipped"] == store.skipped
 
-
-from main import run_ingest_user_note
 
 
 class NoteStore:
@@ -91,8 +88,6 @@ def test_run_ingest_user_note_delete():
     assert result == {"op": "delete", "deleted": 1}
     assert len(store.deletes) == 1
 
-
-from main import run_retrieve
 
 
 class SearchStore:

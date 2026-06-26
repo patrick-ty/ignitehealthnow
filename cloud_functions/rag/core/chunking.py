@@ -1,3 +1,5 @@
+# NOTE: chunk_min_tokens (from config) is reserved/unused in v1. Sections are packed
+# independently by _pack; cross-section merging to enforce a minimum size is deferred.
 import re
 from dataclasses import dataclass, field
 
