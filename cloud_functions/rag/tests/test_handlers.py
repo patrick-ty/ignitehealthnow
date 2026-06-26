@@ -90,3 +90,32 @@ def test_run_ingest_user_note_delete():
     result = run_ingest_user_note(msg, embedder=FakeEmbedder(), store=store)
     assert result == {"op": "delete", "deleted": 1}
     assert len(store.deletes) == 1
+
+
+from main import run_retrieve
+
+
+class SearchStore:
+    def search_kb(self, *, query_embedding, top_k):
+        return [{"content": "book bit", "source_type": "book",
+                 "source_uri": "gs://b/x.md", "metadata": {}, "score": 0.9}][:top_k]
+
+    def search_user_notes(self, *, user_id, query_embedding, top_k):
+        return [{"content": "my note", "source_kind": "journal_note",
+                 "occurred_at": None, "score": 0.8}][:top_k]
+
+
+def test_run_retrieve_returns_kb_and_notes():
+    cfg = load_config()
+    payload = {"user_id": "11111111-1111-1111-1111-111111111111", "query": "why tired"}
+    result = run_retrieve(payload, embedder=FakeEmbedder(), store=SearchStore(), cfg=cfg)
+    assert [h["content"] for h in result["kb"]] == ["book bit"]
+    assert [h["content"] for h in result["notes"]] == ["my note"]
+
+
+def test_run_retrieve_honors_top_k_overrides():
+    cfg = load_config()
+    payload = {"user_id": "1", "query": "q", "top_k_kb": 0, "top_k_user": 0}
+    result = run_retrieve(payload, embedder=FakeEmbedder(), store=SearchStore(), cfg=cfg)
+    assert result["kb"] == []
+    assert result["notes"] == []

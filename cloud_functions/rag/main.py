@@ -92,3 +92,27 @@ def ingest_user_note(cloud_event):
     store = Store(cfg.database_url, cfg.schema)
     run_ingest_user_note(message, embedder=embedder, store=store)
     # No return body for CloudEvent handlers; raising re-queues (nack).
+
+
+def run_retrieve(payload: dict, *, embedder, store, cfg) -> dict:
+    query = payload["query"]
+    user_id = payload["user_id"]
+    top_k_kb = payload.get("top_k_kb", cfg.top_k_kb)
+    top_k_user = payload.get("top_k_user", cfg.top_k_user)
+    qvec = embedder.embed_query(query)
+    kb = store.search_kb(query_embedding=qvec, top_k=top_k_kb) if top_k_kb else []
+    notes = (
+        store.search_user_notes(user_id=user_id, query_embedding=qvec, top_k=top_k_user)
+        if top_k_user else []
+    )
+    return {"kb": kb, "notes": notes}
+
+
+@functions_framework.http
+def retrieve(request):
+    payload = request.get_json(silent=True) or {}
+    cfg = load_config()
+    embedder = Embedder(cfg.gcp_project, cfg.vertex_location, cfg.embed_model)
+    store = Store(cfg.database_url, cfg.schema)
+    result = run_retrieve(payload, embedder=embedder, store=store, cfg=cfg)
+    return (json.dumps(result), 200, {"Content-Type": "application/json"})
