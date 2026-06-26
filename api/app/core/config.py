@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_service_role_key: str
     supabase_jwt_secret: str
-    database_url: str
+    database_url: str = ""  # not used at runtime (profile service uses the Supabase client)
     gcp_kms_key: str = ""
     allow_hs256_fallback: bool = False
 
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     ]
 
     class Config:
-        env_file = ".env.local"
+        env_file = ".env"
         case_sensitive = False
 
 
