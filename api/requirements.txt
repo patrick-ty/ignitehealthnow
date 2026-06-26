@@ -10,4 +10,4 @@ asyncpg==0.29.0
 pytest==8.3.3
 pytest-asyncio==0.24.0
 pytest-cov==5.0.0
-google-cloud-kms==2.28.1
+google-cloud-kms==3.14.0

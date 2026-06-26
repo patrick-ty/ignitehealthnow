@@ -36,6 +36,9 @@ node_modules/
 build/
 dist/
 
+# Logs
+*.log
+
 # Flutter
 .dart_tool/
 .flutter-plugins
