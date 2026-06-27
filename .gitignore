@@ -47,3 +47,7 @@ dist/
 
 # Brainstorm sessions
 .superpowers/
+
+# Browser-automation snapshots & stray root screenshots
+.playwright-mcp/
+/*.png
