@@ -27,6 +27,22 @@ export interface ProfileUpdate {
   avatar_url?: string
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export interface ChatSource {
+  source_uri: string
+  source_type: string
+  score: number
+}
+
+export interface ChatReply {
+  reply: string
+  sources: ChatSource[]
+}
+
 async function getAuthHeaders() {
   const token = await authClient.getToken()
 
@@ -64,6 +80,19 @@ export const api = {
       throw new Error('Failed to update profile')
     }
 
+    return response.json()
+  },
+
+  async chat(messages: ChatMessage[]): Promise<ChatReply> {
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API_URL}/chat`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ messages }),
+    })
+    if (!response.ok) {
+      throw new Error('The assistant is unavailable right now.')
+    }
     return response.json()
   },
 }
