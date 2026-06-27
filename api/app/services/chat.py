@@ -67,7 +67,7 @@ def _vertex_complete_fn():
                 )
                 return resp.content[0].text
             except Exception as exc:  # pragma: no cover - network
-                logger.warning("Claude model %s failed: %s", model, exc)
+                logger.warning("Claude model %s failed: %s", model, type(exc).__name__)
         raise RuntimeError("All chat models failed")
 
     return complete

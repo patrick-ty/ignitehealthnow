@@ -1,0 +1,62 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - img "Ignite Health Now" [ref=e6]
+      - navigation [ref=e7]:
+        - generic [ref=e8]:
+          - link "Dashboard" [ref=e9] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e10]: Dashboard
+          - link "Profile" [ref=e11] [cursor=pointer]:
+            - /url: /profile
+            - generic [ref=e12]: Profile
+          - generic [ref=e13]:
+            - generic [ref=e14]: Journal
+            - generic [ref=e15]: Soon
+          - generic [ref=e16]:
+            - generic [ref=e17]: Insights
+            - generic [ref=e18]: Soon
+    - generic [ref=e19]:
+      - banner [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - button "Open sidebar" [ref=e23]:
+              - img [ref=e24]
+            - generic [ref=e26]:
+              - img [ref=e27]
+              - generic [ref=e29]: Search
+          - generic [ref=e30]:
+            - button "Theme toggle" [ref=e31]:
+              - img [ref=e32]
+            - button "Language" [ref=e34]:
+              - generic [ref=e35]: EN
+            - button "Messages" [ref=e36]:
+              - img [ref=e37]
+            - button "Notifications" [ref=e39]:
+              - img [ref=e40]
+              - generic [ref=e43]: "2"
+            - group [ref=e44]:
+              - generic "User avatar" [ref=e45] [cursor=pointer]:
+                - img "User avatar" [ref=e47]
+        - heading "Dashboard" [level=1] [ref=e49]
+      - main [ref=e50]:
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - heading "Welcome to your dashboard" [level=2] [ref=e53]
+            - paragraph [ref=e54]: Your health journaling features will appear here soon.
+            - generic [ref=e56]:
+              - generic [ref=e57]: Profile Setup
+              - paragraph [ref=e58]:
+                - text: Complete your profile to personalize your experience.
+                - link "Go to Profile Setup" [ref=e59] [cursor=pointer]:
+                  - /url: /profile/setup
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - heading "Daily Journal" [level=3] [ref=e62]
+              - paragraph [ref=e63]: Track symptoms, mood, and habits. Coming soon.
+            - generic [ref=e64]:
+              - heading "Insights" [level=3] [ref=e65]
+              - paragraph [ref=e66]: Review trends and progress over time. Coming soon.
+  - button "Open Next.js Dev Tools" [ref=e72] [cursor=pointer]:
+    - img [ref=e73]
+  - alert [ref=e76]

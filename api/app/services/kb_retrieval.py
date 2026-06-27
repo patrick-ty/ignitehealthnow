@@ -1,6 +1,3 @@
-import vertexai
-from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
-
 from app.core import get_settings
 
 EMBED_DIM = 768
@@ -19,11 +16,16 @@ class KbRetriever:
 
     def _get_model(self):
         if self._model is None:
+            import vertexai
+            from vertexai.language_models import TextEmbeddingModel
+
             vertexai.init(project=self._project, location=self._embed_location)
             self._model = TextEmbeddingModel.from_pretrained(self._embed_model)
         return self._model
 
     def embed_query(self, text: str) -> list[float]:
+        from vertexai.language_models import TextEmbeddingInput
+
         inputs = [TextEmbeddingInput(text, "RETRIEVAL_QUERY")]
         return self._get_model().get_embeddings(inputs)[0].values
 
