@@ -50,3 +50,37 @@ def _test_env(monkeypatch):
         get_settings.cache_clear()
     except Exception:
         pass
+
+
+import sys
+import types
+
+_vertexai = types.ModuleType("vertexai")
+_lm = types.ModuleType("vertexai.language_models")
+
+
+class _FakeEmbedding:
+    def __init__(self, values):
+        self.values = values
+
+
+class _FakeTextEmbeddingInput:
+    def __init__(self, text, task_type):
+        self.text = text
+        self.task_type = task_type
+
+
+class _FakeModel:
+    @classmethod
+    def from_pretrained(cls, name):
+        return cls()
+
+    def get_embeddings(self, inputs):
+        return [_FakeEmbedding([float(len(i.text.split()))] + [0.0] * 767) for i in inputs]
+
+
+_vertexai.init = lambda *a, **k: None
+_lm.TextEmbeddingModel = _FakeModel
+_lm.TextEmbeddingInput = _FakeTextEmbeddingInput
+sys.modules.setdefault("vertexai", _vertexai)
+sys.modules.setdefault("vertexai.language_models", _lm)
