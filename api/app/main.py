@@ -21,7 +21,13 @@ app = FastAPI(
     redoc_url="/redoc" if settings.environment == "dev" else None,
 )
 
-# CORS middleware
+# Request context middleware (inner). Added first so CORS wraps it.
+app.middleware("http")(request_context_middleware)
+
+# CORS middleware — added LAST so it is the OUTERMOST middleware. This guarantees
+# that error responses (e.g. an unhandled 500 from a DB failure) still carry the
+# Access-Control-Allow-Origin header. Otherwise browser client-side calls
+# misreport server errors as CORS failures.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -29,9 +35,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Request context middleware
-app.middleware("http")(request_context_middleware)
 
 # Include routers
 app.include_router(health_router)
