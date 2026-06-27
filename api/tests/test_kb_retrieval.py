@@ -7,7 +7,7 @@ def test_embed_query_returns_768_vector():
                     db_url="postgresql://u:p@localhost/x")
     v = r.embed_query("why am I tired")
     assert len(v) == 768
-    assert v[0] == 3.0  # fake encodes token count
+    assert v[0] == 4.0  # fake encodes word count; "why am I tired" = 4 words
 
 
 def test_retrieve_calls_search_with_embedding(monkeypatch):
