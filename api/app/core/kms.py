@@ -14,14 +14,17 @@ class KMSClient(Protocol):
 class GoogleKMSClient:
     """Google Cloud KMS client wrapper."""
 
-    def __init__(self):
+    def __init__(self, quota_project: str | None = None):
         try:
             from google.cloud import kms  # type: ignore
         except Exception as exc:  # pragma: no cover
             raise RuntimeError(
                 "google-cloud-kms is required for KMS operations. Install dependencies or set a fake client for tests."
             ) from exc
-        self._client = kms.KeyManagementServiceClient()
+        # Bill KMS API usage to the key's own project, not the ambient ADC
+        # quota project (which may be a different project without KMS enabled).
+        client_options = {"quota_project_id": quota_project} if quota_project else None
+        self._client = kms.KeyManagementServiceClient(client_options=client_options)
 
     def encrypt(self, key_name: str, plaintext: bytes) -> bytes:
         try:
@@ -43,4 +46,7 @@ def get_kms_client() -> KMSClient:
     settings = get_settings()
     if not settings.gcp_kms_key:
         raise ValueError("GCP_KMS_KEY is required for PII encryption")
-    return GoogleKMSClient()
+    # Key resource: projects/<project>/locations/.../cryptoKeys/...
+    parts = settings.gcp_kms_key.split("/")
+    quota_project = parts[1] if len(parts) > 2 and parts[0] == "projects" else None
+    return GoogleKMSClient(quota_project=quota_project)
