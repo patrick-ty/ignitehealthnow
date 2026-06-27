@@ -52,15 +52,14 @@ class ChatService:
         return {"reply": reply, "sources": sources}
 
 
-def _vertex_complete_fn():
-    """Build a complete(system, messages) -> str backed by Claude on Vertex, with fallback."""
-    from anthropic import AnthropicVertex
+def _make_complete_fn(client, models):
+    """A complete(system, messages) -> str over an Anthropic-style client, primary→fallback.
 
-    s = get_settings()
-    client = AnthropicVertex(project_id=s.gcp_project, region=s.vertex_chat_location)
-
+    Both AnthropicVertex and the direct Anthropic client expose the identical
+    `client.messages.create(...)` interface, so this loop is shared by both providers.
+    """
     def complete(system: str, messages: list[dict]) -> str:
-        for model in (s.vertex_chat_model, s.vertex_chat_fallback_model):
+        for model in models:
             try:
                 resp = client.messages.create(
                     model=model, max_tokens=1024, system=system, messages=messages,
@@ -71,6 +70,35 @@ def _vertex_complete_fn():
         raise RuntimeError("All chat models failed")
 
     return complete
+
+
+def _vertex_complete_fn():
+    """Claude via Vertex (single GCP BAA — production posture)."""
+    from anthropic import AnthropicVertex
+
+    s = get_settings()
+    client = AnthropicVertex(project_id=s.gcp_project, region=s.vertex_chat_location)
+    return _make_complete_fn(client, (s.vertex_chat_model, s.vertex_chat_fallback_model))
+
+
+def _anthropic_complete_fn():
+    """Claude via Anthropic's direct API (dev — sidesteps Vertex billing-maturity quota gate).
+
+    For real patient PHI this requires Anthropic's BAA; fine for non-PHI dev testing.
+    """
+    from anthropic import Anthropic
+
+    s = get_settings()
+    client = Anthropic(api_key=s.anthropic_api_key)
+    return _make_complete_fn(client, (s.anthropic_chat_model, s.anthropic_chat_fallback_model))
+
+
+def _build_complete_fn():
+    """Select the LLM provider from settings.chat_provider ("vertex" | "anthropic")."""
+    s = get_settings()
+    if s.chat_provider == "anthropic":
+        return _anthropic_complete_fn()
+    return _vertex_complete_fn()
 
 
 _service = None
@@ -84,7 +112,7 @@ def get_chat_service() -> "ChatService":
         s = get_settings()
         _service = ChatService(
             retriever=get_kb_retriever(),
-            complete_fn=_vertex_complete_fn(),
+            complete_fn=_build_complete_fn(),
             top_k=s.chat_top_k,
         )
     return _service

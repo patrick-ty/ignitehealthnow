@@ -19,13 +19,23 @@ class Settings(BaseSettings):
     vertex_embed_location: str = "us-central1"
     vertex_embed_model: str = "text-embedding-005"
 
-    # Chat (Claude via Vertex). The newest Claude models (Sonnet 4.6, Haiku 4.5)
+    # Chat provider: "vertex" (Claude via Vertex — single GCP BAA, production) or
+    # "anthropic" (Claude via Anthropic's direct API — dev, sidesteps the Vertex
+    # billing-maturity quota gate; needs Anthropic's BAA before real PHI).
+    chat_provider: str = "vertex"
+
+    # Chat — Claude via Vertex. The newest Claude models (Sonnet 4.6, Haiku 4.5)
     # are served ONLY on the Vertex `global` endpoint — not regional (us-east5 has
     # only older versions). Verified live: regional returns 404 for 4.6; global
     # resolves it. Keep this `global` unless pinning to an older regional model.
     vertex_chat_location: str = "global"
     vertex_chat_model: str = "claude-sonnet-4-6"          # global endpoint; no @version suffix needed
     vertex_chat_fallback_model: str = "claude-haiku-4-5"  # also global-only
+
+    # Chat — Claude via Anthropic direct API (used when chat_provider == "anthropic")
+    anthropic_api_key: str = ""
+    anthropic_chat_model: str = "claude-sonnet-4-6"
+    anthropic_chat_fallback_model: str = "claude-haiku-4-5-20251001"
     chat_top_k: int = 6
 
     # Cloud SQL knowledge base (rag.kb_chunks)

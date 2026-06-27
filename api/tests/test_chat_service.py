@@ -49,3 +49,62 @@ def test_answer_passes_system_and_messages_and_returns_sources():
     assert "fatigue is cellular" in captured["system"]
     # the user's message is forwarded to the model
     assert captured["messages"][-1]["content"] == "why am I tired"
+
+
+class _Resp:
+    def __init__(self, text):
+        self.content = [type("B", (), {"text": text})()]
+
+
+class _FakeClient:
+    """Stands in for AnthropicVertex / Anthropic — same messages.create interface."""
+    def __init__(self, fail_models=()):
+        self._fail = set(fail_models)
+        self.used = []
+
+        class _Messages:
+            def create(_self, *, model, max_tokens, system, messages):
+                self.used.append(model)
+                if model in self._fail:
+                    raise RuntimeError("model unavailable")
+                return _Resp(f"reply from {model}")
+
+        self.messages = _Messages()
+
+
+def test_make_complete_fn_uses_primary():
+    from app.services.chat import _make_complete_fn
+
+    c = _FakeClient()
+    fn = _make_complete_fn(c, ("primary", "fallback"))
+    assert fn("sys", [{"role": "user", "content": "hi"}]) == "reply from primary"
+    assert c.used == ["primary"]  # fallback never tried when primary works
+
+
+def test_make_complete_fn_falls_back_then_raises():
+    from app.services.chat import _make_complete_fn
+
+    c = _FakeClient(fail_models={"primary"})
+    fn = _make_complete_fn(c, ("primary", "fallback"))
+    assert fn("sys", [{"role": "user", "content": "hi"}]) == "reply from fallback"
+    assert c.used == ["primary", "fallback"]
+
+    import pytest
+    c2 = _FakeClient(fail_models={"primary", "fallback"})
+    with pytest.raises(RuntimeError):
+        _make_complete_fn(c2, ("primary", "fallback"))("sys", [{"role": "user", "content": "hi"}])
+
+
+def test_build_complete_fn_selects_provider(monkeypatch):
+    import app.services.chat as chat
+
+    monkeypatch.setattr(chat, "_vertex_complete_fn", lambda: "VERTEX_FN")
+    monkeypatch.setattr(chat, "_anthropic_complete_fn", lambda: "ANTHROPIC_FN")
+
+    monkeypatch.setattr(chat, "get_settings",
+                        lambda: type("S", (), {"chat_provider": "anthropic"})())
+    assert chat._build_complete_fn() == "ANTHROPIC_FN"
+
+    monkeypatch.setattr(chat, "get_settings",
+                        lambda: type("S", (), {"chat_provider": "vertex"})())
+    assert chat._build_complete_fn() == "VERTEX_FN"
