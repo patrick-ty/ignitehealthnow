@@ -8,6 +8,7 @@ from .profile import (
     PropertyValue,
     UserIdentity,
 )
+from .chat import ChatMessage, ChatRequest, ChatResponse, ChatSource  # noqa: F401
 
 __all__ = [
     "ProfileBase",
@@ -18,4 +19,8 @@ __all__ = [
     "PropertyValue",
     "PropertyUpdate",
     "HealthResponse",
+    "ChatMessage",
+    "ChatRequest",
+    "ChatResponse",
+    "ChatSource",
 ]
