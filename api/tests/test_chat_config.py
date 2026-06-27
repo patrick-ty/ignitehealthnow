@@ -11,7 +11,7 @@ def test_chat_config_defaults(monkeypatch):
     s = get_settings()
     assert s.gcp_project == "ignitehealthnow-2025"
     assert s.kb_database_url.endswith("/ignite")
-    assert s.vertex_chat_location == "us-east5"
+    assert s.vertex_chat_location == "global"  # Sonnet 4.6 / Haiku 4.5 are global-endpoint-only on Vertex
     assert s.vertex_embed_model == "text-embedding-005"
     assert s.chat_top_k == 6
     assert s.vertex_chat_model  # non-empty default
