@@ -21,7 +21,9 @@ async def chat(
     try:
         result = chat_service.answer(request.messages)
     except Exception as e:
-        logger.error("chat failed for user %s: %s", user_id, e)
+        # Log the error *type* only — never the exception content, which could
+        # carry message/PHI text (metadata-only logging constraint).
+        logger.error("chat failed for user %s: %s", user_id, type(e).__name__)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="The assistant is unavailable right now. Please try again.",
