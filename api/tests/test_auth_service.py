@@ -17,7 +17,7 @@ def _make_service(monkeypatch, jwks_payload=None):
         def __init__(self, payload):
             self.payload = payload
 
-        def get(self, url):
+        def get(self, url, **kwargs):
             class Resp:
                 def __init__(self, data):
                     self._data = data

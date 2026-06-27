@@ -20,13 +20,17 @@ class AuthService:
 
     def __init__(self, *, http_client: httpx.Client | None = None):
         self.settings = get_settings()
-        self.jwks_url = f"{self.settings.supabase_url}/auth/v1/keys"
+        self.jwks_url = f"{self.settings.supabase_url}/auth/v1/.well-known/jwks.json"
         self._jwks_cache: list | None = None
         self._jwks_cached_at: float = 0
         self.http_client = http_client or httpx.Client(timeout=5.0)
 
     def _fetch_jwks(self) -> list:
-        resp = self.http_client.get(self.jwks_url)
+        # Supabase's /auth/v1/keys (JWKS) requires an apikey header.
+        resp = self.http_client.get(
+            self.jwks_url,
+            headers={"apikey": self.settings.supabase_service_role_key},
+        )
         resp.raise_for_status()
         data = resp.json()
         return data.get("keys", [])
