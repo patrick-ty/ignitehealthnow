@@ -3,10 +3,19 @@ from app.services.chat import ChatService, SYSTEM_PROMPT, build_context
 
 
 def test_system_prompt_has_guardrails():
+    # Assert the specific phrasing, not loose keywords, so a softened
+    # paraphrase (e.g. "avoid diagnosing when possible") fails this guard.
     p = SYSTEM_PROMPT.lower()
-    assert "never" in p and "diagnos" in p          # non-diagnostic
-    assert "provider" in p                            # defer to provider
-    assert "prescri" in p                             # never prescribe
+    # non-diagnostic: forbidden form named + required alternative form present
+    assert "never diagnose" in p
+    assert "sometimes associated with" in p
+    # never prescribe
+    assert "never prescribe" in p
+    # always defer to the provider
+    assert "always defer to the provider" in p
+    # story items must be framed as illustrative, never evidence
+    assert "illustrative" in p
+    assert "evidence" in p
 
 
 def test_build_context_tags_sources():
