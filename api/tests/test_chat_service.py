@@ -16,6 +16,9 @@ def test_system_prompt_has_guardrails():
     # story items must be framed as illustrative, never evidence
     assert "illustrative" in p
     assert "evidence" in p
+    # must not leak internal scaffolding ("the book"/"the framework") to the patient
+    assert "plain words" in p
+    assert '"the book"' in p
 
 
 def test_build_context_tags_sources():
