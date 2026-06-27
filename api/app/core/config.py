@@ -14,6 +14,20 @@ class Settings(BaseSettings):
     gcp_kms_key: str = ""
     allow_hs256_fallback: bool = False
 
+    # GCP / Vertex
+    gcp_project: str = ""
+    vertex_embed_location: str = "us-central1"
+    vertex_embed_model: str = "text-embedding-005"
+
+    # Chat (Claude via Vertex)
+    vertex_chat_location: str = "us-east5"
+    vertex_chat_model: str = "claude-sonnet-4-6"          # pinned per Vertex Model Garden at deploy
+    vertex_chat_fallback_model: str = "claude-haiku-4-5"
+    chat_top_k: int = 6
+
+    # Cloud SQL knowledge base (rag.kb_chunks)
+    kb_database_url: str = ""
+
     # Environment
     environment: str = "dev"
 
