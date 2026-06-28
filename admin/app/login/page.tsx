@@ -30,7 +30,7 @@ export default function LoginPage() {
       const { error } = await authClient.signIn(email, password)
       if (error) throw new Error(error)
 
-      router.push('/dashboard')
+      router.push('/')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to sign in'
       setError(message)

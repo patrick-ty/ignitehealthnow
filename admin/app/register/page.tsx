@@ -68,7 +68,7 @@ export default function RegisterPage() {
         return
       }
 
-      router.push('/profile/setup')
+      router.push('/')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create account'
       setError(message)
