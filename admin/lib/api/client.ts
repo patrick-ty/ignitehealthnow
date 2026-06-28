@@ -44,6 +44,48 @@ export interface ChatReply {
   sources: ChatSource[]
 }
 
+export type Channel = 'instagram' | 'x' | 'linkedin' | 'facebook'
+export type Status = 'draft' | 'review' | 'scheduled' | 'published'
+
+export interface AdminMe { admin: boolean; email: string }
+
+export interface AdminContentPost {
+  id: string
+  channel: Channel
+  caption: string
+  hashtags: string[]
+  status: Status
+  scheduled_for: string | null
+  source: string | null
+  ai: boolean
+  why_it_works: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminContentCreate {
+  channel: Channel
+  caption: string
+  hashtags?: string[]
+  source?: string | null
+  why_it_works?: string | null
+  status?: Status
+}
+
+export interface AdminContentUpdate {
+  channel?: Channel
+  caption?: string
+  hashtags?: string[]
+  scheduled_for?: string | null
+  source?: string | null
+  why_it_works?: string | null
+}
+
+export interface AdminContentApprove {
+  edited_caption?: string | null
+  scheduled_for?: string | null
+}
+
 async function getAuthHeaders() {
   const token = await authClient.getToken()
 
@@ -95,5 +137,44 @@ export const api = {
       throw new Error('The assistant is unavailable right now.')
     }
     return response.json()
+  },
+
+  async getAdminMe(): Promise<AdminMe> {
+    const res = await fetch(`${API_URL}/admin/me`, { headers: await getAuthHeaders() })
+    if (!res.ok) throw new Error('Failed to load admin status')
+    return res.json()
+  },
+  async listContentPosts(): Promise<AdminContentPost[]> {
+    const res = await fetch(`${API_URL}/admin/content/posts`, { headers: await getAuthHeaders() })
+    if (!res.ok) throw new Error('Failed to load posts')
+    return (await res.json()).posts
+  },
+  async createContentPost(body: AdminContentCreate): Promise<AdminContentPost> {
+    const res = await fetch(`${API_URL}/admin/content/posts`, {
+      method: 'POST', headers: await getAuthHeaders(), body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new Error('Failed to create post')
+    return res.json()
+  },
+  async updateContentPost(id: string, body: AdminContentUpdate): Promise<AdminContentPost> {
+    const res = await fetch(`${API_URL}/admin/content/posts/${id}`, {
+      method: 'PATCH', headers: await getAuthHeaders(), body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new Error('Failed to update post')
+    return res.json()
+  },
+  async approveContentPost(id: string, body: AdminContentApprove): Promise<AdminContentPost> {
+    const res = await fetch(`${API_URL}/admin/content/posts/${id}/approve`, {
+      method: 'POST', headers: await getAuthHeaders(), body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new Error('Failed to approve post')
+    return res.json()
+  },
+  async rejectContentPost(id: string): Promise<AdminContentPost> {
+    const res = await fetch(`${API_URL}/admin/content/posts/${id}/reject`, {
+      method: 'POST', headers: await getAuthHeaders(),
+    })
+    if (!res.ok) throw new Error('Failed to reject post')
+    return res.json()
   },
 }
