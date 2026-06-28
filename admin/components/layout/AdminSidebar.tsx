@@ -2,16 +2,28 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { ReactNode } from 'react'
 import { BrandLogo } from '@/components/brand/BrandLogo'
 
-const NAV = [
-  { label: 'Content & Social', href: '/content', enabled: true },
-  { label: 'Today', href: '/today', enabled: false },
-  { label: 'Overview', href: '/overview', enabled: false },
-  { label: 'Programs', href: '/programs', enabled: false },
-  { label: 'Members', href: '/members', enabled: false },
-  { label: 'Reports', href: '/reports', enabled: false },
-  { label: 'Settings', href: '/settings', enabled: false },
+const DashboardIcon = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+  </svg>
+)
+
+const ContentIcon = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 11v2a2 2 0 0 0 2 2h1.2L11 19V5L6.2 9H5a2 2 0 0 0-2 2Z" />
+    <path d="M15 8a5 5 0 0 1 0 8" />
+  </svg>
+)
+
+const NAV: { label: string; href: string; icon: ReactNode }[] = [
+  { label: 'Dashboard', href: '/', icon: DashboardIcon },
+  { label: 'Content & Social', href: '/content', icon: ContentIcon },
 ]
 
 export default function AdminSidebar() {
@@ -25,19 +37,19 @@ export default function AdminSidebar() {
         <p className="kicker px-3 pb-2">Marketing Ops</p>
         <div className="space-y-1">
           {NAV.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
-            const base = 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition'
-            if (!item.enabled) {
-              return (
-                <div key={item.label} className={`${base} cursor-not-allowed text-faint`}>
-                  <span className="flex-1">{item.label}</span>
-                  <span className="rounded-full bg-line px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted">Soon</span>
-                </div>
-              )
-            }
+            const active =
+              item.href === '/'
+                ? pathname === '/'
+                : pathname === item.href || pathname.startsWith(`${item.href}/`)
             return (
-              <Link key={item.label} href={item.href}
-                className={`${base} ${active ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-page hover:text-brand-ink'}`}>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  active ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-page hover:text-brand-ink'
+                }`}
+              >
+                <span className="shrink-0">{item.icon}</span>
                 <span className="flex-1">{item.label}</span>
               </Link>
             )

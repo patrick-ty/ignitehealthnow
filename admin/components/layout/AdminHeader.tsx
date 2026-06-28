@@ -1,4 +1,5 @@
 const KICKERS: Record<string, { kicker: string; title: string }> = {
+  '/': { kicker: 'Overview', title: 'Dashboard' },
   '/content': { kicker: 'Marketing', title: 'Content & Social' },
 }
 

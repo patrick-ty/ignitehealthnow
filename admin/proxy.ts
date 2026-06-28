@@ -6,15 +6,7 @@ export async function proxy(request: NextRequest) {
   const { response, isAuthenticated } = await updateSession(request)
 
   const p = request.nextUrl.pathname
-  const isProtected =
-    p === '/' ||
-    p.startsWith('/content') ||
-    p.startsWith('/today') ||
-    p.startsWith('/overview') ||
-    p.startsWith('/programs') ||
-    p.startsWith('/members') ||
-    p.startsWith('/reports') ||
-    p.startsWith('/settings')
+  const isProtected = p === '/' || p.startsWith('/content')
 
   if (!isAuthenticated && isProtected) {
     const url = request.nextUrl.clone()
