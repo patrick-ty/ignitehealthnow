@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { authClient } from '@/lib/auth/client'
 import AuthShell from '@/components/layout/AuthShell'
+import {
+  TextField,
+  PasswordField,
+  PasswordStrength,
+  SubmitButton,
+  FormError,
+  MailIcon,
+} from '@/components/auth/fields'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -12,115 +20,125 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
+  const [exists, setExists] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  const inputClass =
-    'mt-1 block w-full rounded-md border border-[#9E9E9E]/40 px-3 py-2 text-[#212121] shadow-sm focus:border-[#007ACC] focus:outline-none focus:ring-2 focus:ring-[#007ACC]/30'
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
+    setExists(false)
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError('Password must be at least 8 characters.')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
       return
     }
 
     setLoading(true)
 
     try {
-      const { error } = await authClient.signUp(email, password)
+      const { error, alreadyRegistered, needsConfirmation } = await authClient.signUp(
+        email,
+        password
+      )
+
+      // Existing-email shows up two ways depending on project config: an explicit
+      // "User already registered" error, or an anti-enumeration "fake success"
+      // (no error, no session). Steer both to the friendly sign-in prompt instead
+      // of a raw error or a silent bounce off the protected route.
+      const emailTaken =
+        alreadyRegistered ||
+        (!!error && /already (registered|exists|been registered)/i.test(error))
+
+      if (emailTaken) {
+        setExists(true)
+        setLoading(false)
+        return
+      }
+
       if (error) throw new Error(error)
 
-      // Redirect to profile setup
+      if (needsConfirmation) {
+        setError('Check your email to confirm your account before signing in.')
+        setLoading(false)
+        return
+      }
+
       router.push('/profile/setup')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create account'
       setError(message)
-    } finally {
       setLoading(false)
     }
   }
 
   return (
     <AuthShell
-      title="Create your account"
-      subtitle="Join Ignite Health Now and start journaling your journey."
-      topLinkHref="/login"
-      topLinkLabel="Back to sign in"
+      heading="Create your account"
+      sub="Start your private health journal with ignitehealthnow."
       footer={
-        <span>
+        <>
           Already have an account?{' '}
-          <Link href="/login" className="font-medium text-[#007ACC] hover:underline">
+          <Link href="/login" className="font-semibold text-accent hover:text-accent-hover">
             Sign in
           </Link>
-        </span>
+        </>
       }
     >
-      <form className="space-y-6" onSubmit={handleRegister}>
-        {error && (
-          <div className="rounded-md border border-[#9E9E9E]/40 bg-[#FFFFFF] px-4 py-3 text-sm text-[#212121]">
-            {error}
+      <form onSubmit={handleRegister}>
+        <FormError message={error} />
+
+        {exists && (
+          <div className="mb-4 rounded-[10px] border border-[#E3EAEF] bg-accent-soft px-4 py-3 text-[13px] text-brand-ink">
+            An account with this email already exists.{' '}
+            <Link href="/login" className="font-semibold text-accent hover:text-accent-hover">
+              Sign in instead
+            </Link>
+            .
           </div>
         )}
 
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-[#212121]">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+        <TextField
+          id="email"
+          label="Email"
+          type="email"
+          icon={MailIcon}
+          value={email}
+          onChange={setEmail}
+          placeholder="you@example.com"
+          autoComplete="email"
+          required
+        />
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[#212121]">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-            />
-            <p className="mt-1 text-xs text-[#9E9E9E]">Must be at least 8 characters.</p>
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#212121]">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+        <div>
+          <PasswordField
+            id="password"
+            label="Password"
+            value={password}
+            onChange={setPassword}
+            placeholder="Create a password"
+            autoComplete="new-password"
+            required
+          />
+          <PasswordStrength value={password} />
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-[#007ACC] px-4 py-3 text-sm font-medium text-[#FFFFFF] shadow-sm transition hover:bg-[#0064A5] focus:outline-none focus:ring-2 focus:ring-[#007ACC]/40 disabled:opacity-50"
-        >
-          {loading ? 'Creating account...' : 'Create account'}
-        </button>
+        <PasswordField
+          id="confirmPassword"
+          label="Confirm password"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          placeholder="Re-enter your password"
+          autoComplete="new-password"
+          required
+        />
+
+        <div className="mt-2">
+          <SubmitButton loading={loading}>Create account</SubmitButton>
+        </div>
       </form>
     </AuthShell>
   )

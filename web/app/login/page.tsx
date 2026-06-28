@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { authClient } from '@/lib/auth/client'
 import AuthShell from '@/components/layout/AuthShell'
+import {
+  TextField,
+  PasswordField,
+  SubmitButton,
+  FormError,
+  MailIcon,
+} from '@/components/auth/fields'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -12,9 +19,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  const inputClass =
-    'mt-1 block w-full rounded-md border border-[#9E9E9E]/40 px-3 py-2 text-[#212121] shadow-sm focus:border-[#007ACC] focus:outline-none focus:ring-2 focus:ring-[#007ACC]/30'
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,76 +33,59 @@ export default function LoginPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to sign in'
       setError(message)
-    } finally {
       setLoading(false)
     }
   }
 
   return (
     <AuthShell
-      title="Sign in"
-      subtitle="Welcome back. Let’s keep your health journey on track."
-      topLinkHref="/register"
-      topLinkLabel="Create account"
+      heading="Welcome back"
+      sub="Sign in to ignitehealthnow."
       footer={
-        <span>
+        <>
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-medium text-[#007ACC] hover:underline">
-            Create account
+          <Link href="/register" className="font-semibold text-accent hover:text-accent-hover">
+            Create an account
           </Link>
-        </span>
+        </>
       }
     >
-      <form className="space-y-6" onSubmit={handleLogin}>
-        {error && (
-          <div className="rounded-md border border-[#9E9E9E]/40 bg-[#FFFFFF] px-4 py-3 text-sm text-[#212121]">
-            {error}
-          </div>
-        )}
+      <form onSubmit={handleLogin}>
+        <FormError message={error} />
 
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-[#212121]">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+        <TextField
+          id="email"
+          label="Email"
+          type="email"
+          icon={MailIcon}
+          value={email}
+          onChange={setEmail}
+          placeholder="you@example.com"
+          autoComplete="email"
+          required
+        />
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[#212121]">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+        <PasswordField
+          id="password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          placeholder="••••••••"
+          autoComplete="current-password"
+          required
+          labelAccessory={
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-accent hover:text-accent-hover"
+            >
+              Forgot?
+            </Link>
+          }
+        />
+
+        <div className="mt-2">
+          <SubmitButton loading={loading}>Sign in</SubmitButton>
         </div>
-
-        <div className="flex items-center justify-between text-sm">
-          <Link href="/forgot-password" className="text-[#007ACC] hover:underline">
-            Forgot password?
-          </Link>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-[#007ACC] px-4 py-3 text-sm font-medium text-[#FFFFFF] shadow-sm transition hover:bg-[#0064A5] focus:outline-none focus:ring-2 focus:ring-[#007ACC]/40 disabled:opacity-50"
-        >
-          {loading ? 'Signing in...' : 'Sign in'}
-        </button>
       </form>
     </AuthShell>
   )

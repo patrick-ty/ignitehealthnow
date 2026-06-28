@@ -15,10 +15,23 @@ export interface AuthResult {
   error: string | null
 }
 
+export interface SignUpResult extends AuthResult {
+  /**
+   * True when the email already belongs to an account. Providers often hide
+   * this behind an anti-enumeration "fake success" (no error, no session);
+   * the adapter normalizes that into this flag so the UI can react clearly.
+   */
+  alreadyRegistered?: boolean
+  /** True when sign-up succeeded but no session was created (email confirmation required). */
+  needsConfirmation?: boolean
+}
+
 export interface AuthClient {
   signIn(email: string, password: string): Promise<AuthResult>
-  signUp(email: string, password: string): Promise<AuthResult>
+  signUp(email: string, password: string): Promise<SignUpResult>
   resetPassword(email: string, redirectTo: string): Promise<AuthResult>
+  /** Set a new password for the user in the current (recovery) session. */
+  updatePassword(password: string): Promise<AuthResult>
   signOut(): Promise<void>
   /** Current access token for API calls, or null if unauthenticated. */
   getToken(): Promise<string | null>

@@ -4,15 +4,13 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { authClient } from '@/lib/auth/client'
 import AuthShell from '@/components/layout/AuthShell'
+import { TextField, SubmitButton, FormError, MailIcon } from '@/components/auth/fields'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  const inputClass =
-    'mt-1 block w-full rounded-md border border-[#9E9E9E]/40 px-3 py-2 text-[#212121] shadow-sm focus:border-[#007ACC] focus:outline-none focus:ring-2 focus:ring-[#007ACC]/30'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,7 +23,6 @@ export default function ForgotPasswordPage() {
         `${window.location.origin}/reset-password`
       )
       if (error) throw new Error(error)
-
       setSubmitted(true)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to send reset email'
@@ -37,19 +34,25 @@ export default function ForgotPasswordPage() {
 
   if (submitted) {
     return (
-      <AuthShell
-        title="Check your email"
-        subtitle="If an account exists, we’ll send a reset link shortly."
-        topLinkHref="/login"
-        topLinkLabel="Back to sign in"
-      >
-        <div className="space-y-4 text-sm text-[#9E9E9E]">
-          <p>
-            We sent a reset link to <span className="font-medium text-[#212121]">{email}</span>.
+      <AuthShell heading="" sub="">
+        <div className="text-center">
+          <div className="mx-auto mb-6 flex h-[62px] w-[62px] items-center justify-center rounded-[18px] bg-[#f0f6e4]">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7FB539" strokeWidth="2">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="m3 7 9 6 9-6" />
+              <path d="m16 16 2.5 2.5L23 14" stroke="#5d8226" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-semibold tracking-[-0.4px] text-brand-ink">Check your inbox</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[#7e909b]">
+            We sent a reset link to{' '}
+            <span className="font-semibold text-[#33454f]">{email}</span>. It expires in 30 minutes.
           </p>
-          <p>Please check your spam folder if you don&apos;t see it.</p>
-          <Link href="/login" className="text-sm font-medium text-[#007ACC] hover:underline">
-            Return to sign in
+          <Link
+            href="/login"
+            className="mt-6 flex h-11 w-full items-center justify-center rounded-[10px] border border-[#E3EAEF] bg-white text-sm font-semibold text-[#33454f] transition hover:border-[#cdd9e0] hover:bg-[#f8fafb]"
+          >
+            Back to sign in
           </Link>
         </div>
       </AuthShell>
@@ -58,47 +61,26 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthShell
-      title="Reset your password"
-      subtitle="Enter your email and we’ll send you a reset link."
-      topLinkHref="/login"
-      topLinkLabel="Back to sign in"
-      footer={
-        <span>
-          Remember your password?{' '}
-          <Link href="/login" className="font-medium text-[#007ACC] hover:underline">
-            Sign in
-          </Link>
-        </span>
-      }
+      heading="Reset your password"
+      sub="Enter your email and we’ll send a secure link to reset your password."
+      back={{ href: '/login', label: 'Back to sign in' }}
     >
-      <form className="space-y-6" onSubmit={handleSubmit}>
-        {error && (
-          <div className="rounded-md border border-[#9E9E9E]/40 bg-[#FFFFFF] px-4 py-3 text-sm text-[#212121]">
-            {error}
-          </div>
-        )}
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-[#212121]">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={inputClass}
-          />
+      <form onSubmit={handleSubmit}>
+        <FormError message={error} />
+        <TextField
+          id="email"
+          label="Email"
+          type="email"
+          icon={MailIcon}
+          value={email}
+          onChange={setEmail}
+          placeholder="you@example.com"
+          autoComplete="email"
+          required
+        />
+        <div className="mt-2">
+          <SubmitButton loading={loading}>Send reset link</SubmitButton>
         </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-[#007ACC] px-4 py-3 text-sm font-medium text-[#FFFFFF] shadow-sm transition hover:bg-[#0064A5] focus:outline-none focus:ring-2 focus:ring-[#007ACC]/40 disabled:opacity-50"
-        >
-          {loading ? 'Sending...' : 'Send reset link'}
-        </button>
       </form>
     </AuthShell>
   )
