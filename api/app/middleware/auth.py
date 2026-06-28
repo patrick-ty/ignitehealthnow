@@ -63,3 +63,29 @@ async def get_current_user_id(
     logger.info(f"Authenticated user: {user_id}")
 
     return user_id
+
+
+async def get_current_claims(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> dict:
+    """Verify the JWT and return its full claims (incl. sub, email)."""
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header required",
+        )
+    claims = get_auth_service().verify_token(credentials.credentials)
+    user_id_var.set(claims.get("sub", ""))
+    return claims
+
+
+async def require_admin(claims: dict = Depends(get_current_claims)) -> dict:
+    """403 unless the verified email is on the ADMIN_EMAILS allowlist."""
+    from app.services.admin_access import is_admin_email
+
+    if not is_admin_email(claims.get("email")):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return claims
