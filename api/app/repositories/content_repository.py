@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Protocol
 
 from app.core import get_settings
@@ -9,6 +9,19 @@ TABLE = "admin_content_posts"
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _jsonify(payload: dict) -> dict:
+    """Serialize values for the Supabase/PostgREST JSON boundary.
+
+    PostgREST serializes the request body to JSON, where raw ``datetime``/``date``
+    objects are not serializable. timestamptz columns accept ISO-8601 strings, so
+    convert any datetime/date values (e.g. ``scheduled_for``) before sending.
+    """
+    return {
+        k: (v.isoformat() if isinstance(v, (datetime, date)) else v)
+        for k, v in payload.items()
+    }
 
 
 class ContentRepository(Protocol):
@@ -70,11 +83,11 @@ class SupabaseContentRepository:
         return (res.data or [None])[0]
 
     def create(self, data: dict) -> dict:
-        res = self.client.table(TABLE).insert(data).execute()
+        res = self.client.table(TABLE).insert(_jsonify(data)).execute()
         return res.data[0]
 
     def update(self, post_id: str, changes: dict) -> dict:
-        res = self.client.table(TABLE).update(changes).eq("id", post_id).execute()
+        res = self.client.table(TABLE).update(_jsonify(changes)).eq("id", post_id).execute()
         return res.data[0]
 
 
