@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 
 import AppHeader from '@/components/layout/AppHeader'
 import AppSidebar from '@/components/layout/AppSidebar'
+import AdvocateLauncher from '@/components/advocate/AdvocateLauncher'
 
 export function getDefaultAvatarUrl(userId: string): string {
   let hash = 0
@@ -15,21 +16,21 @@ export function getDefaultAvatarUrl(userId: string): string {
   return `/avatars/system/avatar-${index}.png`
 }
 
-const titleMap: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/profile': 'Profile',
-  '/profile/setup': 'Profile',
-  '/journal': 'Journal',
-  '/insights': 'Insights',
+const titleMap: Record<string, { title: string; kicker: string }> = {
+  '/dashboard': { title: 'Dashboard', kicker: 'Overview' },
+  '/profile': { title: 'Profile', kicker: 'Account' },
+  '/profile/setup': { title: 'Profile Setup', kicker: 'Account' },
+  '/journal': { title: 'Journal', kicker: 'Tracking' },
+  '/insights': { title: 'Insights', kicker: 'Trends' },
 }
 
-function resolveTitle(pathname: string) {
+function resolveTitle(pathname: string): { title: string; kicker: string } {
   if (titleMap[pathname]) {
     return titleMap[pathname]
   }
 
   const entry = Object.entries(titleMap).find(([path]) => pathname.startsWith(`${path}/`))
-  return entry ? entry[1] : 'Dashboard'
+  return entry ? entry[1] : { title: 'Dashboard', kicker: 'Overview' }
 }
 
 export default function AppShell({
@@ -48,7 +49,7 @@ export default function AppShell({
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const title = useMemo(() => resolveTitle(pathname), [pathname])
+  const { title, kicker } = useMemo(() => resolveTitle(pathname), [pathname])
   /**
    * UI IDENTITY CONTRACT (LOCKED)
    *
@@ -85,12 +86,18 @@ export default function AppShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] text-[#212121]">
+    <div className="min-h-screen bg-page text-body">
       <div className="flex">
-        <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <AppSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          displayName={displayName}
+          avatarUrl={avatarUrl}
+        />
         <div className="flex min-h-screen w-full flex-col lg:pl-64">
           <AppHeader
             title={title}
+            kicker={kicker}
             userDisplayName={displayName}
             avatarUrl={avatarUrl}
             onMenuClick={() => setSidebarOpen(true)}
@@ -100,6 +107,7 @@ export default function AppShell({
           </main>
         </div>
       </div>
+      <AdvocateLauncher />
     </div>
   )
 }
