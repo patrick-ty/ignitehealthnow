@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     # Environment
     environment: str = "dev"
 
+    # Admin access — comma-separated allowlist of admin emails (env ADMIN_EMAILS)
+    admin_emails: str = ""
+
+    def admin_email_set(self) -> set[str]:
+        return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
+
     # API
     api_host: str = "0.0.0.0"
     api_port: int = 8000
