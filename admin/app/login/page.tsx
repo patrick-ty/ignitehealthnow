@@ -42,14 +42,6 @@ export default function LoginPage() {
     <AuthShell
       heading="Welcome back"
       sub="Sign in to ignitehealthnow."
-      footer={
-        <>
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-semibold text-accent hover:text-accent-hover">
-            Create an account
-          </Link>
-        </>
-      }
     >
       <form onSubmit={handleLogin}>
         <FormError message={error} />
