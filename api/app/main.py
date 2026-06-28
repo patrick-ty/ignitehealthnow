@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core import get_settings, setup_logging
 from app.middleware import request_context_middleware
-from app.routers import health_router, profile_router, chat_router
+from app.routers import health_router, profile_router, chat_router, admin_router
 
 # Setup logging
 settings = get_settings()
@@ -40,6 +40,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(profile_router)
 app.include_router(chat_router)
+app.include_router(admin_router)
 
 logger.info(f"Ignite Health API starting in {settings.environment} mode")
 
