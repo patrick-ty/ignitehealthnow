@@ -1,3 +1,5 @@
+import AdminUserMenu from './AdminUserMenu'
+
 const KICKERS: Record<string, { kicker: string; title: string }> = {
   '/': { kicker: 'Overview', title: 'Dashboard' },
   '/content': { kicker: 'Marketing', title: 'Content & Social' },
@@ -11,7 +13,7 @@ export default function AdminHeader({ pathname, email }: { pathname: string; ema
         <p className="kicker">{meta.kicker}</p>
         <h1 className="text-lg font-semibold text-brand-ink">{meta.title}</h1>
       </div>
-      <span className="text-sm text-muted">{email}</span>
+      <AdminUserMenu email={email} />
     </header>
   )
 }
