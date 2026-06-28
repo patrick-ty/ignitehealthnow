@@ -13,18 +13,20 @@ export default function AdvocateLauncher() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showHint, setShowHint] = useState(false)
+
   // First-visit discovery hint (non-PHI UI flag only).
-  // Lazy initializer: typeof window guard makes it SSR-safe; localStorage read is
-  // a one-time external-state sync, not an effect that drives cascading renders.
-  const [showHint, setShowHint] = useState(() => {
-    if (typeof window === 'undefined') return false
+  useEffect(() => {
     try {
-      return !localStorage.getItem(SEEN_KEY)
+      // SSR-safe deferred read: render the hint only after mount so server and client
+      // hydration agree (avoids a hydration mismatch). The lint rule's setState-in-effect
+      // warning is a false positive for one-time client-only state sync.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (!localStorage.getItem(SEEN_KEY)) setShowHint(true)
     } catch {
       /* localStorage unavailable — skip hint */
-      return false
     }
-  })
+  }, [])
 
   // ESC closes the panel.
   useEffect(() => {
