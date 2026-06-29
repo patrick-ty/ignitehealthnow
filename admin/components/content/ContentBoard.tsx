@@ -1,11 +1,15 @@
 'use client'
 
 import { useEffect, useReducer, useState } from 'react'
-import { api, type AdminContentPost, type AdminContentCreate, type AdminContentUpdate } from '@/lib/api/client'
+import { api, type AdminContentPost, type AdminContentCreate, type AdminContentUpdate, type Channel } from '@/lib/api/client'
 import { COLUMNS, groupByStatus } from '@/lib/content/board'
 import { contentReducer } from '@/lib/content/reducer'
 import ContentColumn from './ContentColumn'
 import ContentComposer from './ContentComposer'
+import AiBanner from './AiBanner'
+import ChannelTabs from './ChannelTabs'
+
+type ChannelFilter = 'all' | Channel
 
 export default function ContentBoard() {
   const [posts, dispatch] = useReducer(contentReducer, [])
@@ -13,12 +17,20 @@ export default function ContentBoard() {
   const [error, setError] = useState('')
   const [editing, setEditing] = useState<AdminContentPost | null>(null)
   const [creating, setCreating] = useState(false)
+  const [channel, setChannel] = useState<ChannelFilter>('all')
 
   useEffect(() => {
     api.listContentPosts()
       .then((p) => dispatch({ type: 'set', posts: p }))
       .catch(() => setError('Could not load posts.'))
       .finally(() => setLoading(false))
+  }, [])
+
+  // Listen for the header "+ New post" button
+  useEffect(() => {
+    const handler = () => setCreating(true)
+    window.addEventListener('admin:new-post', handler)
+    return () => window.removeEventListener('admin:new-post', handler)
   }, [])
 
   // Optimistic helper: apply locally, call API, replace with server row, rollback on error.
@@ -71,18 +83,17 @@ export default function ContentBoard() {
     }
   }
 
-  const grouped = groupByStatus(posts)
+  // Filter by channel before grouping
+  const filteredPosts = channel === 'all' ? posts : posts.filter((p) => p.channel === channel)
+  const grouped = groupByStatus(filteredPosts)
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-muted">{posts.length} posts</p>
-        <button onClick={() => setCreating(true)}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-hover">
-          New post
-        </button>
-      </div>
-      {error && <p className="mb-3 rounded-lg bg-[#FBEFEC] px-3 py-2 text-sm text-[#C8553D]">{error}</p>}
+      <AiBanner />
+
+      <ChannelTabs selected={channel} onChange={setChannel} count={filteredPosts.length} />
+
+      {error && <p className="mb-3 rounded-lg bg-warm-soft px-3 py-2 text-sm text-warm">{error}</p>}
       {loading ? (
         <p className="text-sm text-muted">Loading…</p>
       ) : (
@@ -91,7 +102,9 @@ export default function ContentBoard() {
             <ContentColumn
               key={col.status}
               title={col.title}
+              color={col.color}
               posts={grouped[col.status]}
+              onAdd={() => setCreating(true)}
               onApprove={approve}
               onReject={reject}
               onEdit={setEditing}

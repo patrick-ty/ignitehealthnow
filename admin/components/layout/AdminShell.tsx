@@ -9,8 +9,8 @@ export default function AdminShell({ children, email }: { children: React.ReactN
   const pathname = usePathname()
   return (
     <div className="min-h-screen bg-page text-body">
-      <AdminSidebar />
-      <div className="flex min-h-screen w-full flex-col lg:pl-64">
+      <AdminSidebar email={email} />
+      <div className="flex min-h-screen w-full flex-col lg:pl-60">
         <AdminHeader pathname={pathname} email={email} />
         <main className="flex-1 px-6 py-6">{children}</main>
       </div>
